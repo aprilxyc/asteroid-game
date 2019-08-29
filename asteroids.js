@@ -7,12 +7,7 @@ function asteroids() {
         .attr("transform", "translate(300 300) rotate(300)");
     keydown$
         .scan(0, (acc, curr) => acc + 10)
-        .map((e) => {
-        return {
-            translation: "translate(300 " + String(e) + ") rotate(300)"
-        };
-    })
-        .subscribe(({ translation }) => g.attr("transform", translation));
+        .subscribe((translation) => g.attr("transform", `translate(300 ${translation}) rotate(300)`));
     let ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 15,20 0,-30")
         .attr("style", "fill:red;stroke:purple;stroke-width:1");

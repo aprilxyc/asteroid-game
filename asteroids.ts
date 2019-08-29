@@ -36,37 +36,19 @@ function asteroids() {
   // make a group for the spaceship and a transform to move it and rotate it
   // to animate the spaceship you will update the transform property
   // spaceship actual movement
-  // SET THE COORDINATETS FIRST?
-
-
-  // function* infiniteSeq(seed) {
-  //   var i = seed;
-  //   while (true) {
-  //     yield i;
-  //     i = i + 1;  // add 1
-  //   }
-  // }
-
-  // const iterator    = infiniteSeq(300);           // insert starting value 300
-  // const generateNum = Observable.from(iterator);
-  // generateNum.subscribe((x: number) => console.log(x))
-
-
-
   let g = new Elem(svg, 'g')
     .attr("transform", "translate(300 300) rotate(300)")
 
 
   keydown$
     .scan(0, (acc, curr) => acc + 10)
-    .map((e) => { // moving stuff goes into event
-      return {
-        translation: "translate(300 " + String(e) + ") rotate(300)"
-      }
-    })
-    // .takeUntil(keyup$)
-    .subscribe(({ translation }) =>
-      g.attr("transform", translation));
+    // .map((e) => { // moving stuff goes into event
+    //   return {
+    //     translation: "translate(300 " + String(e) + ") rotate(300)"
+    //   }
+    // })
+    .subscribe((translation) =>
+      g.attr("transform", `translate(300 ${translation}) rotate(300)`));
 
 
 

@@ -58,15 +58,13 @@ function asteroids() {
 
 
   keydown$
-    .map((e) => {
-      const myNum = initSequence((value: number) => value + 1)
-      let   value = 200;
-      console.log(myNum(value).next().next().next())
+    .scan(0, (acc, curr) => acc + 10)
+    .map((e) => { // moving stuff goes into event
       return {
-        translation: "translate(300 " + String(myNum(300)) + ") rotate(300)"
+        translation: "translate(300 " + String(e) + ") rotate(300)"
       }
     })
-    .takeUntil(keyup$)
+    // .takeUntil(keyup$)
     .subscribe(({ translation }) =>
       g.attr("transform", translation));
 

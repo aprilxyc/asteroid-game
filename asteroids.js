@@ -6,15 +6,12 @@ function asteroids() {
     let g = new Elem(svg, 'g')
         .attr("transform", "translate(300 300) rotate(300)");
     keydown$
+        .scan(0, (acc, curr) => acc + 10)
         .map((e) => {
-        const myNum = initSequence((value) => value + 1);
-        let value = 200;
-        console.log(myNum(value).next().next().next());
         return {
-            translation: "translate(300 " + String(myNum(300)) + ") rotate(300)"
+            translation: "translate(300 " + String(e) + ") rotate(300)"
         };
     })
-        .takeUntil(keyup$)
         .subscribe(({ translation }) => g.attr("transform", translation));
     let ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 15,20 0,-30")

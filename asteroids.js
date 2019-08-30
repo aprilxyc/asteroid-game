@@ -11,10 +11,10 @@ function asteroids() {
             .filter((key) => (key == k))
             .scan(0, (acc, curr) => acc + 10)
             .map(transformFn)
-            .subscribe((translation) => g.attr("transform", `translate(300 ${translation}) rotate(300)`));
+            .subscribe((translation) => g.attr("transform", String(translation)));
     };
-    f('ArrowUp', x => `translate(0 ${x}) rotate(300)`);
-    f('ArrowDown', x => `translate(0 ${x}) rotate(300)`);
+    f('ArrowDown', x => `translate(300 ${x}) rotate(300)`);
+    f('ArrowRight', x => `translate(${x} 300) rotate(255)`);
     let g = new Elem(svg, 'g')
         .attr("transform", "translate(300 300) rotate(300)");
     let ship = new Elem(svg, 'polygon', g.elem)

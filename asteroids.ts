@@ -42,11 +42,13 @@ function asteroids() {
       .scan(0, (acc, curr) => acc + 10)
       .map(transformFn)
       .subscribe((translation) =>
-        g.attr("transform", `translate(300 ${translation}) rotate(300)`))
+        g.attr("transform", String(translation)))
   }
 
-  f('ArrowUp', x => `translate(0 ${x}) rotate(300)`);
-  f('ArrowDown', x => `translate(0 ${x}) rotate(300)`);
+  f('ArrowDown', x => `translate(300 ${x}) rotate(300)`);
+  f('ArrowRight', x => `translate(${x} 300) rotate(255)`);
+  // f('ArrowLeft', x => `translate(${x} 300) rotate(450)`);
+  // f('ArrowDown', x => `translate(300 ${x}) rotate(300)`);
 
   // make a group for the spaceship and a transform to move it and rotate it
   // to animate the spaceship you will update the transform property

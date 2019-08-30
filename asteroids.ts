@@ -32,6 +32,21 @@ function asteroids() {
   //   }))
   //   .subscribe(({ translation }) => g.attr("transoform", translation));
 
+  // write a function for the translation
+  const f = (k, transformFn) => {
+    keydown$
+      .map(({ key }) => {
+        return key
+      })
+      .filter((key) => (key == k))
+      .scan(0, (acc, curr) => acc + 10)
+      .map(transformFn)
+      .subscribe((translation) =>
+        g.attr("transform", `translate(300 ${translation}) rotate(300)`))
+  }
+
+  f('ArrowUp', x => `translate(0 ${x}) rotate(300)`);
+  f('ArrowDown', x => `translate(0 ${x}) rotate(300)`);
 
   // make a group for the spaceship and a transform to move it and rotate it
   // to animate the spaceship you will update the transform property
@@ -39,34 +54,43 @@ function asteroids() {
   let g = new Elem(svg, 'g')
     .attr("transform", "translate(300 300) rotate(300)")
 
-
-
-  let shipControls = 
-  {
-    moveUp   : "ArrowUp",
-    moveDown : "ArrowDown",
-    moveLeft : "ArrowLeft",
-    moveRight: "Arrowright"
-  }
-
-  keydown$
-    .map(({ key }) => {
-      return key
-    })
-    .filter((key) => (key == "ArrowUp"))
-    .scan(0, (acc, curr) => acc + 10)
-    // .map((e) => { // moving stuff goes into event
-    //   return {
-    //     translation: "translate(300 " + String(e) + ") rotate(300)"
-    //   }
-    // })
-    .subscribe((translation) =>
-      g.attr("transform", `translate(300 ${translation}) rotate(300)`));
-
-
+  // keydown$
+  //   .map(({ key }) => {
+  //     return key
+  //   })
+  //   .filter((key) => (key == "ArrowUp"))
+  //   .scan(0, (acc, curr) => acc + 10)
+  //   .subscribe((translation) =>
+  //     g.attr("transform", `translate(300 ${translation}) rotate(300)`))
 
   // keydown$
-  //   .subscribe((e) => console.log(e));
+  //   .map(({ key }) => {
+  //     return key
+  //   })
+  //   .filter((key) => (key == "ArrowDown"))
+  //   .scan(0, (acc, curr) => acc + 10)
+  //   .subscribe((translation) =>
+  //     g.attr("transform", `translate(300 ${translation}) rotate(300)`))
+
+  // keydown$
+  //   .map(({ key }) => {
+  //     return key
+  //   })
+  //   .filter((key) => (key == "ArrowLeft"))
+  //   .scan(0, (acc, curr) => acc + 10)
+  //   .subscribe((translation) =>
+  //     g.attr("transform", `translate(${translation} 300) rotate(300)`))
+  // // transform returns the string at the moment 
+
+  // keydown$
+  //   .map(({ key }) => {
+  //     return key
+  //   })
+  //   .filter((key) => (key == "ArrowRight"))
+  //   .scan(0, (acc, curr) => acc + 10)
+  //   .subscribe((translation) =>
+  //     g.attr("transform", `translate(300 ${translation}) rotate(300)`))
+
 
 
 

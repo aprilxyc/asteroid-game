@@ -5,7 +5,17 @@ function asteroids() {
     const keyup$ = Observable.fromEvent(document, 'keyup');
     let g = new Elem(svg, 'g')
         .attr("transform", "translate(300 300) rotate(300)");
+    let shipControls = {
+        moveUp: "ArrowUp",
+        moveDown: "ArrowDown",
+        moveLeft: "ArrowLeft",
+        moveRight: "Arrowright"
+    };
     keydown$
+        .map(({ key }) => {
+        return key;
+    })
+        .filter((key) => (key == "ArrowUp"))
         .scan(0, (acc, curr) => acc + 10)
         .subscribe((translation) => g.attr("transform", `translate(300 ${translation}) rotate(300)`));
     let ship = new Elem(svg, 'polygon', g.elem)

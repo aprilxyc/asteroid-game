@@ -40,7 +40,20 @@ function asteroids() {
     .attr("transform", "translate(300 300) rotate(300)")
 
 
+
+  let shipControls = 
+  {
+    moveUp   : "ArrowUp",
+    moveDown : "ArrowDown",
+    moveLeft : "ArrowLeft",
+    moveRight: "Arrowright"
+  }
+
   keydown$
+    .map(({ key }) => {
+      return key
+    })
+    .filter((key) => (key == "ArrowUp"))
     .scan(0, (acc, curr) => acc + 10)
     // .map((e) => { // moving stuff goes into event
     //   return {
@@ -49,6 +62,12 @@ function asteroids() {
     // })
     .subscribe((translation) =>
       g.attr("transform", `translate(300 ${translation}) rotate(300)`));
+
+
+
+  // keydown$
+  //   .subscribe((e) => console.log(e));
+
 
 
 

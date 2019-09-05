@@ -13,7 +13,7 @@ function asteroids() {
         .filter((key) => (key == "ArrowLeft"))
         .scan(0, (acc, curr) => acc + 10)
         .subscribe(() => {
-        const rotation = shipMove[3] = Number(shipMove[3] + 10);
+        const rotation = shipMove[3] = Number(shipMove[3] - 10);
         g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`);
     });
     keydown$
@@ -23,7 +23,7 @@ function asteroids() {
         .filter((key) => (key == "ArrowRight"))
         .scan(0, (acc, curr) => acc + 10)
         .subscribe(() => {
-        const rotation = shipMove[3] = Number(shipMove[3] - 10);
+        const rotation = shipMove[3] = Number(shipMove[3] + 10);
         g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`);
     });
     keydown$
@@ -42,6 +42,21 @@ function asteroids() {
     let ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 15,20 0,-30")
         .attr("style", "fill:red;stroke:purple;stroke-width:1");
+    let bulletShot = new Elem(svg, 'ellipse')
+        .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
+        .attr("cx", Number(shipMove[1]))
+        .attr("cy", Number(shipMove[2]))
+        .attr("rx", 10)
+        .attr("ry", 10);
+    let shipBullet = {
+        bullet: bulletShot
+    };
+    keydown$
+        .map(({ key }) => {
+        return key;
+    })
+        .filter(({ key }) => key == "Space")
+        .subscribe(console.log);
 }
 if (typeof window != 'undefined')
     window.onload = () => {

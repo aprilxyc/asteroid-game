@@ -87,7 +87,7 @@ function asteroids() {
     .filter((key) => (key == "ArrowLeft"))
     .scan(0, (acc, curr) => acc + 10) // Don't need a scan
     .subscribe(() => {
-      const rotation = shipMove[3] = Number(shipMove[3] + 10)
+      const rotation = shipMove[3] = Number(shipMove[3] - 10)
       g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`)
     }
     )
@@ -100,7 +100,7 @@ function asteroids() {
     .filter((key) => (key == "ArrowRight"))
     .scan(0, (acc, curr) => acc + 10)
     .subscribe(() => {
-      const rotation = shipMove[3] = Number(shipMove[3] - 10)
+      const rotation = shipMove[3] = Number(shipMove[3] + 10)
       g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`)
     })
 
@@ -119,20 +119,36 @@ function asteroids() {
       g.attr("transform", `translate(${shipMove[1] = Number(shipMove[1]) + distanceX} ${shipMove[2] = Number(shipMove[2]) + distanceY}) rotate(${rotation})`)
     })
 
+
+
   // create a polygon shape for the space ship as a child of the transform group
   // spaceship aesthetic
   let ship = new Elem(svg, 'polygon', g.elem)
     .attr("points", "-15,20 15,20 0,-30")
     .attr("style", "fill:red;stroke:purple;stroke-width:1")
 
+  let bulletShot = new Elem(svg, 'ellipse')
+    .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
+    .attr("cx", Number(shipMove[1])) // follow where the arrow is
+    .attr("cy", Number(shipMove[2]))
+    .attr("rx", 10)
+    .attr("ry", 10)
+
+  let shipBullet = {
+    bullet: bulletShot
+  }
+
+  keydown$
+    .map(({ key }) => {
+      return key
+    })
+    .filter(({ key }) => key == "Space")
+    .subscribe(console.log)
 }
+
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')
   window.onload = () => {
     asteroids();
   }
-
-
-
-

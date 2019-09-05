@@ -23,32 +23,8 @@ function asteroids() {
 
   // const animate = setInterval(() => rect.attr('x', 1 + Number(rect.attr('x'))), 10);
 
-  // keydown$
-  //   .map(() => {
-  //     x: 300
-  //   })
-  //   .map(({ x }: Number) => ({
-  //     translation: "translate (300 " + String(x + 1) + ") rotate(300)"
-  //   }))
-  //   .subscribe(({ translation }) => g.attr("transoform", translation));
 
-  // write a function for the translation
-  const f = (k, transformFn) => {
-    keydown$
-      .map(({ key }) => {
-        return key
-      })
-      .filter((key) => (key == k))
-      .scan(0, (acc, curr) => acc + 10)
-      .map(transformFn)
-      .subscribe((translation) =>
-        g.attr("transform", String(translation)))
-  }
 
-  f('ArrowDown', x => `translate(300 ${x}) rotate(300)`);
-  f('ArrowRight', x => `translate(${x} 300) rotate(255)`);
-  // f('ArrowLeft', x => `translate(${x} 300) rotate(450)`);
-  // f('ArrowDown', x => `translate(300 ${x}) rotate(300)`);
 
   // make a group for the spaceship and a transform to move it and rotate it
   // to animate the spaceship you will update the transform property
@@ -56,76 +32,98 @@ function asteroids() {
   let g = new Elem(svg, 'g')
     .attr("transform", "translate(300 300) rotate(300)")
 
-  // keydown$
-  //   .map(({ key }) => {
-  //     return key
-  //   })
-  //   .filter((key) => (key == "ArrowUp"))
-  //   .scan(0, (acc, curr) => acc + 10)
-  //   .subscribe((translation) =>
-  //     g.attr("transform", `translate(300 ${translation}) rotate(300)`))
+  // regex pattern to parse the string
+  let shipMove = /translate\((\d+) (\d+)\) rotate\((\d+)\)/.exec(g.attr("transform"));
+  // 0: "translate(300 300) rotate(70)"
+  // 1: "300"
+  // 2: "300"
+  // 3: "70"
+  // console.log(currentG[1]);
 
-  // keydown$
-  //   .map(({ key }) => {
-  //     return key
-  //   })
-  //   .filter((key) => (key == "ArrowDown"))
-  //   .scan(0, (acc, curr) => acc + 10)
-  //   .subscribe((translation) =>
-  //     g.attr("transform", `translate(300 ${translation}) rotate(300)`))
+  // use interval to make it continue
+  // write a function for the translation
 
-  // keydown$
-  //   .map(({ key }) => {
-  //     return key
-  //   })
-  //   .filter((key) => (key == "ArrowLeft"))
-  //   .scan(0, (acc, curr) => acc + 10)
-  //   .subscribe((translation) =>
-  //     g.attr("transform", `translate(${translation} 300) rotate(300)`))
-  // // transform returns the string at the moment 
+  // const f = (k, transformFn) => {
+  //   keydown$
+  //     .map(({ key }) => {
+  //       return key
+  //     })
+  //     .filter((key) => (key == k))
+  //     .scan(300, transformFn)
+  //     .subscribe((rotation) =>
+  //       g.attr("transform", `translate(300 300) rotate(${Number(currentG[2]) + rotation})`))
+  // }
+
+  // // f('ArrowDown', (acc, x) => acc + 10);
+  // // f('ArrowUp', (acc, x) => acc + 10);
+  // f('ArrowLeft', (acc, x) => acc - 10);
+  // f('ArrowRight', (acc, x) => acc + 10);
+
+
+
 
   // keydown$
   //   .map(({ key }) => {
   //     return key
   //   })
   //   .filter((key) => (key == "ArrowRight"))
-  //   .scan(0, (acc, curr) => acc + 10)
+  //   .scan(300, (acc, curr) => acc + 10)
   //   .subscribe((translation) =>
-  //     g.attr("transform", `translate(300 ${translation}) rotate(300)`))
-
-
-
-
+  //     g.attr("transform", `translate(300 300) rotate(${translation})`))
 
   // keydown$
-  //   .subscribe((e) => g.attr("transform", "translate(300 500) rotate(300)"))
+  //   .map(({ key }) => {
+  //     return key
+  //   })
+  //   .filter((key) => (key == "ArrowLeft"))
+  //   .scan(300, (acc, curr) => acc - 10)
+  //   .subscribe((translation) =>
+  //     g.attr("transform", `translate(300 300) rotate(${translation})`))
 
-  // keydown$
-  //   .subscribe((e) => moveLeft(g));
+  keydown$ // get the repeat object and take it once itis true
+    .map(({ key }) => {
+      return key
+    })
+    .filter((key) => (key == "ArrowLeft"))
+    .scan(0, (acc, curr) => acc + 10) // Don't need a scan
+    .subscribe(() => {
+      const rotation = shipMove[3] = Number(shipMove[3] + 10)
+      g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`)
+    }
+    )
 
 
+  keydown$
+    .map(({ key }) => {
+      return key
+    })
+    .filter((key) => (key == "ArrowRight"))
+    .scan(0, (acc, curr) => acc + 10)
+    .subscribe(() => {
+      const rotation = shipMove[3] = Number(shipMove[3] - 10)
+      g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`)
+    })
 
-  // g.subscribe(({ x, y }) => console.log);
 
-
-  //     .filter(x => x.keyCode === 32)
-  //     .map(({ translate, rotate }) => {
-  //       translate: translate(300 300),
-  //       rotate   : rotate(300),
-  //     })
-  //     .subscribe(({ translate, rotate }) => {
-  //       g.attr("transform", toString(translate) + ' ' + toString(rotate))
-  //     )
-  // }
-
+  keydown$
+    .map(({ key }) => {
+      return key
+    })
+    .filter((key) => (key == "ArrowUp"))
+    .scan(0, (acc, curr) => acc + 10)
+    .subscribe(() => {
+      const rotationRadians = shipMove[3] * (Math.PI / 180)
+      const distanceX       = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10
+      const distanceY       = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
+      const rotation        = shipMove[3]
+      g.attr("transform", `translate(${shipMove[1] = Number(shipMove[1]) + distanceX} ${shipMove[2] = Number(shipMove[2]) + distanceY}) rotate(${rotation})`)
+    })
 
   // create a polygon shape for the space ship as a child of the transform group
   // spaceship aesthetic
   let ship = new Elem(svg, 'polygon', g.elem)
     .attr("points", "-15,20 15,20 0,-30")
     .attr("style", "fill:red;stroke:purple;stroke-width:1")
-
-  console.log(g.elem)
 
 }
 

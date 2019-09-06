@@ -33,12 +33,17 @@ function asteroids() {
     .attr("transform", "translate(300 300) rotate(300)")
 
   // regex pattern to parse the string
-  let shipMove = /translate\((\d+) (\d+)\) rotate\((\d+)\)/.exec(g.attr("transform"));
+  let shipMove = /translate\((\d+) (\d+)\) rotate\((\d+)\)/.exec(g.attr("transform"))!;
   // 0: "translate(300 300) rotate(70)"
   // 1: "300"
   // 2: "300"
   // 3: "70"
   // console.log(currentG[1]);
+
+  // store as global variables
+
+
+
 
   // use interval to make it continue
   // write a function for the translation
@@ -80,6 +85,13 @@ function asteroids() {
   //   .subscribe((translation) =>
   //     g.attr("transform", `translate(300 300) rotate(${translation})`))
 
+  // store r 
+  let translateX = Number(shipMove[1])
+  let translateY = Number(shipMove[2])
+  let rotation   = Number(shipMove[3])
+
+
+  // movement left
   keydown$ // get the repeat object and take it once itis true
     .map(({ key }) => {
       return key
@@ -87,12 +99,12 @@ function asteroids() {
     .filter((key) => (key == "ArrowLeft"))
     .scan(0, (acc, curr) => acc + 10) // Don't need a scan
     .subscribe(() => {
-      const rotation = shipMove[3] = Number(shipMove[3] - 10)
-      g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`)
+      // const rotation = shipMove[3] = Number(shipMove[3] - 10)
+      g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 10})`)
     }
     )
 
-
+  // movement right
   keydown$
     .map(({ key }) => {
       return key
@@ -100,11 +112,11 @@ function asteroids() {
     .filter((key) => (key == "ArrowRight"))
     .scan(0, (acc, curr) => acc + 10)
     .subscribe(() => {
-      const rotation = shipMove[3] = Number(shipMove[3] + 10)
-      g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`)
+      // const rotation = shipMove[3] = Number(shipMove[3] + 10)
+      g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 10})`)
     })
 
-
+  // movement up
   keydown$
     .map(({ key }) => {
       return key
@@ -112,14 +124,11 @@ function asteroids() {
     .filter((key) => (key == "ArrowUp"))
     .scan(0, (acc, curr) => acc + 10)
     .subscribe(() => {
-      const rotationRadians = shipMove[3] * (Math.PI / 180)
+      const rotationRadians = rotation * (Math.PI / 180)
       const distanceX       = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10
       const distanceY       = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
-      const rotation        = shipMove[3]
-      g.attr("transform", `translate(${shipMove[1] = Number(shipMove[1]) + distanceX} ${shipMove[2] = Number(shipMove[2]) + distanceY}) rotate(${rotation})`)
+      g.attr("transform", `translate(${translateX = translateX + distanceX} ${translateY = translateY + distanceY}) rotate(${rotation})`)
     })
-
-
 
   // create a polygon shape for the space ship as a child of the transform group
   // spaceship aesthetic
@@ -127,24 +136,35 @@ function asteroids() {
     .attr("points", "-15,20 15,20 0,-30")
     .attr("style", "fill:red;stroke:purple;stroke-width:1")
 
-  let bulletShot = new Elem(svg, 'ellipse')
-    .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
-    .attr("cx", Number(shipMove[1])) // follow where the arrow is
-    .attr("cy", Number(shipMove[2]))
-    .attr("rx", 10)
-    .attr("ry", 10)
-
-  let shipBullet = {
-    bullet: bulletShot
-  }
+  // handle the shooting with the space bar
+  let bulletX = translateX
+  let bulletY = translateY
 
   keydown$
     .map(({ key }) => {
       return key
     })
-    .filter(({ key }) => key == "Space")
-    .subscribe(console.log)
+    .filter((key) => (key == " "))
+    .subscribe((e) => {
+      const rotationRadians = rotation * (Math.PI / 180)
+      const bulletDistanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10
+      const bulletDistanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
+
+      let bulletShot = new Elem(svg, 'ellipse')
+        .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
+        .attr("cx", translateX) // follow where the arrow is
+        .attr("cy", translateY)
+        .attr("rx", 5)
+        .attr("ry", 5)
+      Observable.interval(100)
+        .subscribe(() => {
+          bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX)
+          bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY)
+        });
+    })
 }
+
+// For asteroids, absolute distance mustt be smaller than sum of the radii then they have collided
 
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.

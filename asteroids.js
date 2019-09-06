@@ -6,6 +6,9 @@ function asteroids() {
     let g = new Elem(svg, 'g')
         .attr("transform", "translate(300 300) rotate(300)");
     let shipMove = /translate\((\d+) (\d+)\) rotate\((\d+)\)/.exec(g.attr("transform"));
+    let translateX = Number(shipMove[1]);
+    let translateY = Number(shipMove[2]);
+    let rotation = Number(shipMove[3]);
     keydown$
         .map(({ key }) => {
         return key;
@@ -13,8 +16,7 @@ function asteroids() {
         .filter((key) => (key == "ArrowLeft"))
         .scan(0, (acc, curr) => acc + 10)
         .subscribe(() => {
-        const rotation = shipMove[3] = Number(shipMove[3] - 10);
-        g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`);
+        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 10})`);
     });
     keydown$
         .map(({ key }) => {
@@ -23,8 +25,7 @@ function asteroids() {
         .filter((key) => (key == "ArrowRight"))
         .scan(0, (acc, curr) => acc + 10)
         .subscribe(() => {
-        const rotation = shipMove[3] = Number(shipMove[3] + 10);
-        g.attr("transform", `translate(${shipMove[1]} ${shipMove[2]}) rotate(${rotation})`);
+        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 10})`);
     });
     keydown$
         .map(({ key }) => {
@@ -33,30 +34,37 @@ function asteroids() {
         .filter((key) => (key == "ArrowUp"))
         .scan(0, (acc, curr) => acc + 10)
         .subscribe(() => {
-        const rotationRadians = shipMove[3] * (Math.PI / 180);
+        const rotationRadians = rotation * (Math.PI / 180);
         const distanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10;
         const distanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10;
-        const rotation = shipMove[3];
-        g.attr("transform", `translate(${shipMove[1] = Number(shipMove[1]) + distanceX} ${shipMove[2] = Number(shipMove[2]) + distanceY}) rotate(${rotation})`);
+        g.attr("transform", `translate(${translateX = translateX + distanceX} ${translateY = translateY + distanceY}) rotate(${rotation})`);
     });
     let ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 15,20 0,-30")
         .attr("style", "fill:red;stroke:purple;stroke-width:1");
-    let bulletShot = new Elem(svg, 'ellipse')
-        .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
-        .attr("cx", Number(shipMove[1]))
-        .attr("cy", Number(shipMove[2]))
-        .attr("rx", 10)
-        .attr("ry", 10);
-    let shipBullet = {
-        bullet: bulletShot
-    };
+    let bulletX = translateX;
+    let bulletY = translateY;
     keydown$
         .map(({ key }) => {
         return key;
     })
-        .filter(({ key }) => key == "Space")
-        .subscribe(console.log);
+        .filter((key) => (key == " "))
+        .subscribe((e) => {
+        const rotationRadians = rotation * (Math.PI / 180);
+        const bulletDistanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10;
+        const bulletDistanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10;
+        let bulletShot = new Elem(svg, 'ellipse')
+            .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
+            .attr("cx", translateX)
+            .attr("cy", translateY)
+            .attr("rx", 5)
+            .attr("ry", 5);
+        Observable.interval(100)
+            .subscribe(() => {
+            bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX);
+            bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY);
+        });
+    });
 }
 if (typeof window != 'undefined')
     window.onload = () => {

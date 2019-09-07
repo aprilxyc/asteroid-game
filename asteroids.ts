@@ -35,7 +35,7 @@ function asteroids() {
   // regex pattern to parse the string
   let shipMove = /translate\((\d+) (\d+)\) rotate\((\d+)\)/.exec(g.attr("transform"))!;
   // 0: "translate(300 300) rotate(70)"
-  // 1: "300"
+  // 1: "300" 
   // 2: "300"
   // 3: "70"
   // console.log(currentG[1]);
@@ -65,27 +65,6 @@ function asteroids() {
   // f('ArrowRight', (acc, x) => acc + 10);
 
 
-
-
-  // keydown$
-  //   .map(({ key }) => {
-  //     return key
-  //   })
-  //   .filter((key) => (key == "ArrowRight"))
-  //   .scan(300, (acc, curr) => acc + 10)
-  //   .subscribe((translation) =>
-  //     g.attr("transform", `translate(300 300) rotate(${translation})`))
-
-  // keydown$
-  //   .map(({ key }) => {
-  //     return key
-  //   })
-  //   .filter((key) => (key == "ArrowLeft"))
-  //   .scan(300, (acc, curr) => acc - 10)
-  //   .subscribe((translation) =>
-  //     g.attr("transform", `translate(300 300) rotate(${translation})`))
-
-  // store r 
   let translateX = Number(shipMove[1])
   let translateY = Number(shipMove[2])
   let rotation   = Number(shipMove[3])
@@ -137,8 +116,17 @@ function asteroids() {
     .attr("style", "fill:red;stroke:purple;stroke-width:1")
 
   // handle the shooting with the space bar
-  let bulletX = translateX
-  let bulletY = translateY
+
+
+  // reduce observables into an array  -> takes emissions from observable and reduces them too initial value
+  // keep time and user input int oobservables and do merge etc.. combine etc... 
+  // there is merge nad merge but merge withh the latest bit 
+  // reduce user input into a game state
+
+  // store the bullets into an array
+  let bulletArray = []
+
+  Observable.apply
 
   keydown$
     .map(({ key }) => {
@@ -150,19 +138,55 @@ function asteroids() {
       const bulletDistanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10
       const bulletDistanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
 
+      // put bullets into an array
       let bulletShot = new Elem(svg, 'ellipse')
         .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
         .attr("cx", translateX) // follow where the arrow is
         .attr("cy", translateY)
         .attr("rx", 5)
         .attr("ry", 5)
-      Observable.interval(100)
-        .subscribe(() => {
-          bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX)
-          bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY)
-        });
+
+      bulletArray.push(bulletShot)
+
+      return Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+        .subscribe((currBullet) => {
+          let bulletX = Number(currBullet.currBullet.attr("cx"))
+          let bulletY = Number(currBullet.currBullet.attr("cy"))
+          {
+            currBullet.currBullet.attr("cx", bulletDistanceX + bulletX)
+            currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
+          }
+        })
     })
+  // if (bullet.cx < 600 && bullet.cy < 600) {
+  //   bullet.attr("cx", bulletX = bulletDistanceX + bulletX)
+  //   bullet.attr("cy", bulletY = bulletDistanceY + bulletY)
+  // }
+
+  // .subscribe((bullet) => console.log(bullet))
+  //   .filter((bulletShot) => 0 < bulletShot.cx < 600) && 0 < bulletShot.cy < 600)
+  // .map(() => {
+  //   bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX)
+  //   bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY)
+  // })
+  // .filter((bulletShot) => bulletShot.cx > 600 || bulletShot.cy > 600)
+  // .map(() => bulletShot.remove);
+})
 }
+
+// logic for asterood destriyubg 
+// const checkIfOnscreen = (bullet) => {
+//   if bullet.cx < 600 & bullet.cy < 600 {
+//     bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX)
+//     bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY)
+//   } else {
+//     parent.remove(child)
+//   }
+// }
+
+// 
+// element.remove 
+//parent.remove(child)
 
 // For asteroids, absolute distance mustt be smaller than sum of the radii then they have collided
 

@@ -42,8 +42,8 @@ function asteroids() {
     let ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 15,20 0,-30")
         .attr("style", "fill:red;stroke:purple;stroke-width:1");
-    let bulletX = translateX;
-    let bulletY = translateY;
+    let bulletArray = [];
+    Observable.apply;
     keydown$
         .map(({ key }) => {
         return key;
@@ -59,10 +59,15 @@ function asteroids() {
             .attr("cy", translateY)
             .attr("rx", 5)
             .attr("ry", 5);
-        Observable.interval(100)
-            .subscribe(() => {
-            bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX);
-            bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY);
+        bulletArray.push(bulletShot);
+        return Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+            .subscribe((currBullet) => {
+            let bulletX = Number(currBullet.currBullet.attr("cx"));
+            let bulletY = Number(currBullet.currBullet.attr("cy"));
+            {
+                currBullet.currBullet.attr("cx", bulletDistanceX + bulletX);
+                currBullet.currBullet.attr("cy", bulletDistanceY + bulletY);
+            }
         });
     });
 }

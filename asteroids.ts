@@ -148,39 +148,33 @@ function asteroids() {
 
       bulletArray.push(bulletShot)
 
-      return Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+      Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+        .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)
+        .filter((currBullet) => Number(currBullet.currBullet.attr("cy")) < 600)
         .subscribe((currBullet) => {
           let bulletX = Number(currBullet.currBullet.attr("cx"))
           let bulletY = Number(currBullet.currBullet.attr("cy"))
-          {
-            currBullet.currBullet.attr("cx", bulletDistanceX + bulletX)
-            currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
-          }
+
+          currBullet.currBullet.attr("cx", bulletDistanceX + bulletX)
+          currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
         })
     })
-  // if (bullet.cx < 600 && bullet.cy < 600) {
-  //   bullet.attr("cx", bulletX = bulletDistanceX + bulletX)
-  //   bullet.attr("cy", bulletY = bulletDistanceY + bulletY)
-  // }
 
-  // .subscribe((bullet) => console.log(bullet))
-  //   .filter((bulletShot) => 0 < bulletShot.cx < 600) && 0 < bulletShot.cy < 600)
-  // .map(() => {
-  //   bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX)
-  //   bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY)
-  // })
-  // .filter((bulletShot) => bulletShot.cx > 600 || bulletShot.cy > 600)
-  // .map(() => bulletShot.remove);
-})
+    // delete the element using
+    // element.remove 
+//parent.remove(child)
+
+
 }
 
-// logic for asterood destriyubg 
+
+// logic for asterood destroying 
 // const checkIfOnscreen = (bullet) => {
 //   if bullet.cx < 600 & bullet.cy < 600 {
 //     bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX)
 //     bulletShot.attr("cy", bulletY = bulletDistanceY + bulletY)
 //   } else {
-//     parent.remove(child)
+//     parent.remove(child) // delete the element using element.remove
 //   }
 // }
 

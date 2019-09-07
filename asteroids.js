@@ -60,14 +60,14 @@ function asteroids() {
             .attr("rx", 5)
             .attr("ry", 5);
         bulletArray.push(bulletShot);
-        return Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+        Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+            .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)
+            .filter((currBullet) => Number(currBullet.currBullet.attr("cy")) < 600)
             .subscribe((currBullet) => {
             let bulletX = Number(currBullet.currBullet.attr("cx"));
             let bulletY = Number(currBullet.currBullet.attr("cy"));
-            {
-                currBullet.currBullet.attr("cx", bulletDistanceX + bulletX);
-                currBullet.currBullet.attr("cy", bulletDistanceY + bulletY);
-            }
+            currBullet.currBullet.attr("cx", bulletDistanceX + bulletX);
+            currBullet.currBullet.attr("cy", bulletDistanceY + bulletY);
         });
     });
 }

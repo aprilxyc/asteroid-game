@@ -14,8 +14,8 @@ function asteroids() {
     let rotation = Number(shipMove[3]);
     let asteroid = new Elem(svg, "circle")
         .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
-        .attr("cx", 50)
-        .attr("cy", 50)
+        .attr("cx", 300)
+        .attr("cy", 20)
         .attr("r", 50);
     function getRandomInt(min, max) {
         return Math.floor((Math.random() + min) * Math.floor(max));
@@ -27,16 +27,35 @@ function asteroids() {
     let directionY = getDirection();
     let x_velocity = directionX * getRandomInt(1, 8);
     let y_velocity = directionY * getRandomInt(1, 8);
-    Observable.interval(1)
-        .takeUntil(Observable.interval(100))
+    Observable.interval(100)
+        .takeUntil(Observable.interval(10000))
         .map(() => {
         asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx")));
         asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy")));
+        return asteroid;
     })
-        .map((x) => { x, currAsteroid; asteroid; })
-        .filter((currAsteroid) => (currAsteroid.cx < 600))
-        .filter((currAsteroid) => (currAsteriod.cy < 600))
-        .subscribe(() => console.log);
+        .filter((asteroid) => (asteroid.attr("cx") > 600 + 50))
+        .map((asteroid) => {
+        asteroid.attr("cx", -50);
+        return asteroid;
+    })
+        .filter((asteroid) => (asteroid.attr("cx") < -50))
+        .map((asteroid) => {
+        asteroid.attr("cx", 650);
+        return asteroid;
+    })
+        .filter((asteroid) => asteroid.attr("cy") > 650)
+        .map((asteroid) => {
+        asteroid.attr("cy", -50);
+        return asteroid;
+    })
+        .filter((asteroid) => asteroid.attr("cy") < 50)
+        .map((asteroid) => {
+        asteroid("cy", 600 + 50);
+        return asteroid;
+    })
+        .filter((asteroid) => (asteroid.attr("cy") < 600))
+        .subscribe((asteroid) => console.log);
     keydown$
         .map(({ key }) => {
         return key;

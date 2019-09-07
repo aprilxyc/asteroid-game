@@ -64,8 +64,8 @@ function asteroids() {
 
   let asteroid = new Elem(svg, "circle")
         .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
-        .attr("cx", 50) // follow where the arrow is
-        .attr("cy", 50)
+        .attr("cx", 300) // follow where the arrow is
+        .attr("cy", 20)
         .attr("r", 50)
 
 
@@ -86,16 +86,39 @@ function asteroids() {
   let x_velocity = directionX * getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
   let y_velocity = directionY * getRandomInt(1,8); // same here
 
-  Observable.interval(1)
-  .takeUntil(Observable.interval(100))
+  Observable.interval(100)
+  .takeUntil(Observable.interval(10000))
   .map(() => {
     asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx"))); // the ball should go towards the left or the right
     asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy"))); // the ball should go up or down
+    return asteroid
   })
-  .map((x) => {x, currAsteroid: asteroid})
-  .filter((currAsteroid)=> (currAsteroid.cx < 600))
-  .filter((currAsteroid) => (currAsteriod.cy < 600))
-  .subscribe(() => console.log)
+  .filter((asteroid)=> (asteroid.attr("cx") > 600 + 50))
+  .map((asteroid) => {
+    asteroid.attr("cx", -50)
+    return asteroid
+  })
+  .filter((asteroid) => (asteroid.attr("cx") < -50))
+  .map((asteroid) => {
+    asteroid.attr("cx", 650)
+    return asteroid
+  })
+  .filter((asteroid) => asteroid.attr("cy") > 650)
+  .map((asteroid) => {
+    asteroid.attr("cy", -50)
+    return asteroid
+  })
+  .filter((asteroid) => asteroid.attr("cy") < 50)
+  .map((asteroid) => {
+    asteroid("cy", 600 + 50)
+    return asteroid
+  })
+  .filter((asteroid) => (asteroid.attr("cy") < 600))
+  .subscribe((asteroid) => console.log)
+
+
+    // .subscribe((asteroid) => console.log(asteroid.attr("cx")))
+
 
   // Observable.interval(10)
   // .takeUntil(Observable.interval(100000))
@@ -106,14 +129,6 @@ function asteroids() {
   // }).filter((asteroidXcoord) => (asteroidXcoord > 600))
   // .subscribe(() => asteroid.attr("cx", 0))
 
-
-  // .map(() => {
-  //   asteroid.attr("cy", asteroidY = asteroidY + 10)
-  //   return asteroid.attr("cy")
-  // })
-  // .filter((asteroidYcoord) => asteroidYcord > 600)
-  // .subscribe(() => asteroids.attr("cy", 0))
-  
 
   // movement left
   keydown$ // get the repeat object and take it once itis true

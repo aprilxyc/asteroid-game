@@ -29,10 +29,14 @@ function asteroids() {
     let y_velocity = directionY * getRandomInt(1, 8);
     Observable.interval(1)
         .takeUntil(Observable.interval(100))
-        .subscribe(() => {
+        .map(() => {
         asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx")));
         asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy")));
-    });
+    })
+        .map((x) => { x, currAsteroid; asteroid; })
+        .filter((currAsteroid) => (currAsteroid.cx < 600))
+        .filter((currAsteroid) => (currAsteriod.cy < 600))
+        .subscribe(() => console.log);
     keydown$
         .map(({ key }) => {
         return key;

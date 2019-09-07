@@ -13,15 +13,12 @@ function asteroids() {
   // Explain which ideas you have used ideas from the lectures to 
   // create reusable, generic functions.
 
-  // create he canvas Element
   const svg = document.getElementById("canvas")!;
 
-  // creates new observable that emits an event object everytime a keydwn is fired
+  // creates new observable that emits an event object everytime a keydown is fired
   // emits keyboard event everytime user presses down a key
   const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown');
   const keyup$   = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
-
-  // const animate = setInterval(() => rect.attr('x', 1 + Number(rect.attr('x'))), 10);
 
   // make a group for the spaceship and a transform to move it and rotate it
   // to animate the spaceship you will update the transform property
@@ -35,8 +32,6 @@ function asteroids() {
   // 1: "300" 
   // 2: "300"
   // 3: "70"
-  // console.log(currentG[1]);
-
 
   // use interval to make it continue
   // write a function for the translation
@@ -57,7 +52,7 @@ function asteroids() {
   // f('ArrowLeft', (acc, x) => acc - 10);
   // f('ArrowRight', (acc, x) => acc + 10);
 
-    // create a polygon shape for the space ship as a child of the transform group
+  // create a polygon shape for the space ship as a child of the transform group
   // spaceship aesthetic
   let ship = new Elem(svg, 'polygon', g.elem)
     .attr("points", "-15,20 15,20 0,-30")
@@ -91,16 +86,16 @@ function asteroids() {
   let x_velocity = directionX * getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
   let y_velocity = directionY * getRandomInt(1,8); // same here
 
- 
-
   Observable.interval(1)
   .takeUntil(Observable.interval(100))
-  .subscribe(() => {
+  .map(() => {
     asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx"))); // the ball should go towards the left or the right
     asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy"))); // the ball should go up or down
   })
-
-
+  .map((x) => {x, currAsteroid: asteroid})
+  .filter((currAsteroid)=> (currAsteroid.cx < 600))
+  .filter((currAsteroid) => (currAsteriod.cy < 600))
+  .subscribe(() => console.log)
 
   // Observable.interval(10)
   // .takeUntil(Observable.interval(100000))
@@ -119,21 +114,6 @@ function asteroids() {
   // .filter((asteroidYcoord) => asteroidYcord > 600)
   // .subscribe(() => asteroids.attr("cy", 0))
   
-
-  // Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
-  // .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)
-  // .filter((currBullet) => Number(currBullet.currBullet.attr("cy")) < 600)
-  // .subscribe((currBullet) => {
-  //   let bulletX = Number(currBullet.currBullet.attr("cx"))
-  //   let bulletY = Number(currBullet.currBullet.attr("cy"))
-
-  //   currBullet.currBullet.attr("cx", bulletDistanceX + bulletX)
-  //   currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
-  // })
-
-
-
-
 
   // movement left
   keydown$ // get the repeat object and take it once itis true
@@ -173,11 +153,6 @@ function asteroids() {
       const distanceY       = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
       g.attr("transform", `translate(${translateX = translateX + distanceX} ${translateY = translateY + distanceY}) rotate(${rotation})`)
     })
-
-
-
-  // handle the shooting with the space bar
-
 
   // reduce observables into an array  -> takes emissions from observable and reduces them too initial value
   // keep time and user input int oobservables and do merge etc.. combine etc... 
@@ -225,8 +200,7 @@ function asteroids() {
 
 }
 
-
-// logic for asterood destroying 
+// logic for asteroid destroying 
 // const checkIfOnscreen = (bullet) => {
 //   if bullet.cx < 600 & bullet.cy < 600 {
 //     bulletShot.attr("cx", bulletX = bulletDistanceX + bulletX)
@@ -236,12 +210,7 @@ function asteroids() {
 //   }
 // }
 
-// 
-// element.remove 
-//parent.remove(child)
-
-// For asteroids, absolute distance mustt be smaller than sum of the radii then they have collided
-
+// For asteroids, absolute distance must be smaller than sum of the radii then they have collided
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')

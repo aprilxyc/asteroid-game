@@ -13,18 +13,18 @@ function asteroids() {
     let translateY = Number(shipMove[2]);
     let rotation = Number(shipMove[3]);
     let asteroid = new Elem(svg, "circle")
-        .attr("style", "fill:yellow;stroke:white;stroke-width:2")
+        .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
         .attr("cx", 50)
         .attr("cy", 50)
         .attr("r", 50);
-    Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
-        .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)
-        .filter((currBullet) => Number(currBullet.currBullet.attr("cy")) < 600)
-        .subscribe((currBullet) => {
-        let bulletX = Number(currBullet.currBullet.attr("cx"));
-        let bulletY = Number(currBullet.currBullet.attr("cy"));
-        currBullet.currBullet.attr("cx", bulletDistanceX + bulletX);
-        currBullet.currBullet.attr("cy", bulletDistanceY + bulletY);
+    let randomMovement = Math.random();
+    let asteroidX = Number(asteroid.attr("cx"));
+    let asteroidY = Number(asteroid.attr("cy"));
+    Observable.interval(10)
+        .takeUntil(Observable.interval(100))
+        .subscribe(() => {
+        asteroid.attr("cx", asteroidX = asteroidX + 10);
+        asteroid.attr("cx", asteroidY = asteroidY + 10);
     });
     keydown$
         .map(({ key }) => {

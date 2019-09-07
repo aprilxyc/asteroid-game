@@ -68,32 +68,34 @@ function asteroids() {
   let rotation   = Number(shipMove[3])
 
   let asteroid = new Elem(svg, "circle")
-        .attr("style", "fill:yellow;stroke:white;stroke-width:2")
+        .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
         .attr("cx", 50) // follow where the arrow is
         .attr("cy", 50)
         .attr("r", 50)
 
 
   // use an interval to keep
-  // let randomMovement = Math.random()
-  // let asteroidX = Number(asteroid.attr("cx"))
-  // let asteroidY = Number(asteroids.attr("cy"))
+  let randomMovement = Math.random()
+  let asteroidX = Number(asteroid.attr("cx"))
+  let asteroidY = Number(asteroid.attr("cy"))
 
-  // Observable.interval(100).subscribe(() => {
-  //   asteroid.attr("cx", asteroidX + randomMovement)
-  //   asteroid.attr("cx", asteroidY + randomMovement)
-  // })
-
-  Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
-  .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)
-  .filter((currBullet) => Number(currBullet.currBullet.attr("cy")) < 600)
-  .subscribe((currBullet) => {
-    let bulletX = Number(currBullet.currBullet.attr("cx"))
-    let bulletY = Number(currBullet.currBullet.attr("cy"))
-
-    currBullet.currBullet.attr("cx", bulletDistanceX + bulletX)
-    currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
+  Observable.interval(10)
+  .takeUntil(Observable.interval(100))
+  .subscribe(() => {
+    asteroid.attr("cx", asteroidX = asteroidX + 10)
+    asteroid.attr("cx", asteroidY = asteroidY + 10)
   })
+
+  // Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+  // .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)
+  // .filter((currBullet) => Number(currBullet.currBullet.attr("cy")) < 600)
+  // .subscribe((currBullet) => {
+  //   let bulletX = Number(currBullet.currBullet.attr("cx"))
+  //   let bulletY = Number(currBullet.currBullet.attr("cy"))
+
+  //   currBullet.currBullet.attr("cx", bulletDistanceX + bulletX)
+  //   currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
+  // })
 
 
 

@@ -75,16 +75,50 @@ function asteroids() {
 
 
   // use an interval to keep
-  let randomMovement = Math.random()
-  let asteroidX = Number(asteroid.attr("cx"))
-  let asteroidY = Number(asteroid.attr("cy"))
+  // taken from:
+  // https://stackoverflow.com/questions/52015418/random-movement-angular
+  function getRandomInt(min: Number, max: Number) {
+    return Math.floor((Math.random() + min) * Math.floor(max));
+  }
 
-  Observable.interval(10)
+  // Then you will need to determine the direction, if it is negative (go left) or positive (go right):
+  function getDirection() {
+    return getRandomInt(0, 2) === 0? -1 : 1; 
+  }
+
+  let directionX = getDirection();
+  let directionY = getDirection();
+  let x_velocity = directionX * getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
+  let y_velocity = directionY * getRandomInt(1,8); // same here
+
+ 
+
+  Observable.interval(1)
   .takeUntil(Observable.interval(100))
   .subscribe(() => {
-    asteroid.attr("cx", asteroidX = asteroidX + 10)
-    asteroid.attr("cx", asteroidY = asteroidY + 10)
+    asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx"))); // the ball should go towards the left or the right
+    asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy"))); // the ball should go up or down
   })
+
+
+
+  // Observable.interval(10)
+  // .takeUntil(Observable.interval(100000))
+  // .map(() => {
+  //   asteroid.attr("cx", asteroidX = asteroidX + 10)
+  //   // asteroid.attr("cx", asteroidY = asteroidY + 10)
+  //   return asteroid.attr("cx")
+  // }).filter((asteroidXcoord) => (asteroidXcoord > 600))
+  // .subscribe(() => asteroid.attr("cx", 0))
+
+
+  // .map(() => {
+  //   asteroid.attr("cy", asteroidY = asteroidY + 10)
+  //   return asteroid.attr("cy")
+  // })
+  // .filter((asteroidYcoord) => asteroidYcord > 600)
+  // .subscribe(() => asteroids.attr("cy", 0))
+  
 
   // Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
   // .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)

@@ -17,14 +17,21 @@ function asteroids() {
         .attr("cx", 50)
         .attr("cy", 50)
         .attr("r", 50);
-    let randomMovement = Math.random();
-    let asteroidX = Number(asteroid.attr("cx"));
-    let asteroidY = Number(asteroid.attr("cy"));
-    Observable.interval(10)
+    function getRandomInt(min, max) {
+        return Math.floor((Math.random() + min) * Math.floor(max));
+    }
+    function getDirection() {
+        return getRandomInt(0, 2) === 0 ? -1 : 1;
+    }
+    let directionX = getDirection();
+    let directionY = getDirection();
+    let x_velocity = directionX * getRandomInt(1, 8);
+    let y_velocity = directionY * getRandomInt(1, 8);
+    Observable.interval(1)
         .takeUntil(Observable.interval(100))
         .subscribe(() => {
-        asteroid.attr("cx", asteroidX = asteroidX + 10);
-        asteroid.attr("cx", asteroidY = asteroidY + 10);
+        asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx")));
+        asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy")));
     });
     keydown$
         .map(({ key }) => {

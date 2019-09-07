@@ -23,9 +23,6 @@ function asteroids() {
 
   // const animate = setInterval(() => rect.attr('x', 1 + Number(rect.attr('x'))), 10);
 
-
-
-
   // make a group for the spaceship and a transform to move it and rotate it
   // to animate the spaceship you will update the transform property
   // spaceship actual movement
@@ -39,10 +36,6 @@ function asteroids() {
   // 2: "300"
   // 3: "70"
   // console.log(currentG[1]);
-
-  // store as global variables
-
-
 
 
   // use interval to make it continue
@@ -64,10 +57,46 @@ function asteroids() {
   // f('ArrowLeft', (acc, x) => acc - 10);
   // f('ArrowRight', (acc, x) => acc + 10);
 
-
+    // create a polygon shape for the space ship as a child of the transform group
+  // spaceship aesthetic
+  let ship = new Elem(svg, 'polygon', g.elem)
+    .attr("points", "-15,20 15,20 0,-30")
+    .attr("style", "fill:#f4e46c;stroke:#f4e46c;stroke-width:1")
+  
   let translateX = Number(shipMove[1])
   let translateY = Number(shipMove[2])
   let rotation   = Number(shipMove[3])
+
+  let asteroid = new Elem(svg, "circle")
+        .attr("style", "fill:yellow;stroke:white;stroke-width:2")
+        .attr("cx", 50) // follow where the arrow is
+        .attr("cy", 50)
+        .attr("r", 50)
+
+
+  // use an interval to keep
+  // let randomMovement = Math.random()
+  // let asteroidX = Number(asteroid.attr("cx"))
+  // let asteroidY = Number(asteroids.attr("cy"))
+
+  // Observable.interval(100).subscribe(() => {
+  //   asteroid.attr("cx", asteroidX + randomMovement)
+  //   asteroid.attr("cx", asteroidY + randomMovement)
+  // })
+
+  Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+  .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) < 600)
+  .filter((currBullet) => Number(currBullet.currBullet.attr("cy")) < 600)
+  .subscribe((currBullet) => {
+    let bulletX = Number(currBullet.currBullet.attr("cx"))
+    let bulletY = Number(currBullet.currBullet.attr("cy"))
+
+    currBullet.currBullet.attr("cx", bulletDistanceX + bulletX)
+    currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
+  })
+
+
+
 
 
   // movement left
@@ -109,11 +138,7 @@ function asteroids() {
       g.attr("transform", `translate(${translateX = translateX + distanceX} ${translateY = translateY + distanceY}) rotate(${rotation})`)
     })
 
-  // create a polygon shape for the space ship as a child of the transform group
-  // spaceship aesthetic
-  let ship = new Elem(svg, 'polygon', g.elem)
-    .attr("points", "-15,20 15,20 0,-30")
-    .attr("style", "fill:red;stroke:purple;stroke-width:1")
+
 
   // handle the shooting with the space bar
 
@@ -126,8 +151,6 @@ function asteroids() {
   // store the bullets into an array
   let bulletArray = []
 
-  Observable.apply
-
   keydown$
     .map(({ key }) => {
       return key
@@ -139,12 +162,11 @@ function asteroids() {
       const bulletDistanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
 
       // put bullets into an array
-      let bulletShot = new Elem(svg, 'ellipse')
-        .attr("style", "fill:yellow;stroke:purple;stroke-width:2")
+      let bulletShot = new Elem(svg, 'circle')
+        .attr("style", "fill:#ffffff;stroke:#ffffff;stroke-width:2")
         .attr("cx", translateX) // follow where the arrow is
         .attr("cy", translateY)
-        .attr("rx", 5)
-        .attr("ry", 5)
+        .attr("r", 5)
 
       bulletArray.push(bulletShot)
 

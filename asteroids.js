@@ -1,6 +1,8 @@
 "use strict";
 function asteroids() {
     const svg = document.getElementById("canvas");
+    let gameTimer = 100, gameComplete = false;
+    const gameObservable = Observable.interval(gameTimer).filter(() => !gameComplete);
     const keydown$ = Observable.fromEvent(document, 'keydown');
     const keyup$ = Observable.fromEvent(document, 'keyup');
     let g = new Elem(svg, 'g')
@@ -12,6 +14,8 @@ function asteroids() {
     let translateX = Number(shipMove[1]);
     let translateY = Number(shipMove[2]);
     let rotation = Number(shipMove[3]);
+    let asteroid_velocityX = 1;
+    let asteroid_velocityY = 1;
     let asteroid = new Elem(svg, "circle")
         .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
         .attr("cx", 300)
@@ -25,37 +29,23 @@ function asteroids() {
     }
     let directionX = getDirection();
     let directionY = getDirection();
-    let x_velocity = directionX * getRandomInt(1, 8);
-    let y_velocity = directionY * getRandomInt(1, 8);
-    Observable.interval(100)
-        .takeUntil(Observable.interval(10000))
-        .map(() => {
-        asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx")));
-        asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy")));
-        return asteroid;
-    })
-        .filter((asteroid) => (asteroid.attr("cx") > 600 + 50))
-        .map((asteroid) => {
-        asteroid.attr("cx", -50);
-        return asteroid;
-    })
-        .filter((asteroid) => (asteroid.attr("cx") < -50))
-        .map((asteroid) => {
-        asteroid.attr("cx", 650);
-        return asteroid;
-    })
-        .filter((asteroid) => asteroid.attr("cy") > 650)
-        .map((asteroid) => {
-        asteroid.attr("cy", -50);
-        return asteroid;
-    })
-        .filter((asteroid) => asteroid.attr("cy") < 50)
-        .map((asteroid) => {
-        asteroid("cy", 600 + 50);
-        return asteroid;
-    })
-        .filter((asteroid) => (asteroid.attr("cy") < 600))
-        .subscribe((asteroid) => console.log);
+    let velocityX = getRandomInt(1, 8);
+    let velocityY = getRandomInt(1, 8);
+    gameObservable.subscribe(() => {
+        asteroid.attr("cx", directionX * velocityX + Number(asteroid.attr("cx")));
+        asteroid.attr("cy", directionY * velocityY + Number(asteroid.attr("cy")));
+    });
+    gameObservable
+        .map(() => ({
+        asteroidX: Number(asteroid.attr("cx")),
+        asteroidY: Number(asteroid.attr("cy")),
+        asteroidR: Number(asteroid.attr("r"))
+    }))
+        .filter(({ asteroidX, asteroidY, asteroidR }) => ((asteroidX >= 600 || asteroidX <= 0) && (asteroidY >= 600 || asteroidY <= 0)))
+        .subscribe(() => {
+        directionX *= -1;
+        directionY *= -1;
+    });
     keydown$
         .map(({ key }) => {
         return key;

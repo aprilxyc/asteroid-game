@@ -15,6 +15,10 @@ function asteroids() {
 
   const svg = document.getElementById("canvas")!;
 
+  let gameTimer = 100,
+      gameComplete = false
+  const gameObservable = Observable.interval(gameTimer).filter(() => !gameComplete)
+
   // creates new observable that emits an event object everytime a keydown is fired
   // emits keyboard event everytime user presses down a key
   const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown');
@@ -33,25 +37,6 @@ function asteroids() {
   // 2: "300"
   // 3: "70"
 
-  // use interval to make it continue
-  // write a function for the translation
-
-  // const f = (k, transformFn) => {
-  //   keydown$
-  //     .map(({ key }) => {
-  //       return key
-  //     })
-  //     .filter((key) => (key == k))
-  //     .scan(300, transformFn)
-  //     .subscribe((rotation) =>
-  //       g.attr("transform", `translate(300 300) rotate(${Number(currentG[2]) + rotation})`))
-  // }
-
-  // // f('ArrowDown', (acc, x) => acc + 10);
-  // // f('ArrowUp', (acc, x) => acc + 10);
-  // f('ArrowLeft', (acc, x) => acc - 10);
-  // f('ArrowRight', (acc, x) => acc + 10);
-
   // create a polygon shape for the space ship as a child of the transform group
   // spaceship aesthetic
   let ship = new Elem(svg, 'polygon', g.elem)
@@ -62,62 +47,106 @@ function asteroids() {
   let translateY = Number(shipMove[2])
   let rotation   = Number(shipMove[3])
 
+  let asteroid_velocityX = 1
+  let asteroid_velocityY = 1
+
   let asteroid = new Elem(svg, "circle")
         .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
         .attr("cx", 300) // follow where the arrow is
         .attr("cy", 20)
         .attr("r", 50)
 
-
   // use an interval to keep
-  // taken from:
-  // https://stackoverflow.com/questions/52015418/random-movement-angular
-  function getRandomInt(min: Number, max: Number) {
+  // inspired by: https://stackoverflow.com/questions/52015418/random-movement-angular
+  function getRandomInt(min: number, max: number) {
     return Math.floor((Math.random() + min) * Math.floor(max));
   }
 
   // Then you will need to determine the direction, if it is negative (go left) or positive (go right):
   function getDirection() {
-    return getRandomInt(0, 2) === 0? -1 : 1; 
+    return getRandomInt(0, 2) === 0 ? -1 : 1; 
   }
 
   let directionX = getDirection();
   let directionY = getDirection();
-  let x_velocity = directionX * getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
-  let y_velocity = directionY * getRandomInt(1,8); // same here
 
-  Observable.interval(100)
-  .takeUntil(Observable.interval(10000))
-  .map(() => {
-    asteroid.attr("cx", x_velocity + Number(asteroid.attr("cx"))); // the ball should go towards the left or the right
-    asteroid.attr("cy", y_velocity + Number(asteroid.attr("cy"))); // the ball should go up or down
-    return asteroid
+  let velocityX = getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
+  let velocityY = getRandomInt(1,8); // same here
+
+  // LOGIC FOR ASTEROID MOVING RANDOMLY
+  gameObservable.subscribe(() => {
+    asteroid.attr("cx", directionX * velocityX + Number(asteroid.attr("cx")))  // the ball should go towards the left or the right
+    asteroid.attr("cy", directionY * velocityY + Number(asteroid.attr("cy"))) // the ball should go up or down
   })
-  .filter((asteroid)=> (asteroid.attr("cx") > 600 + 50))
-  .map((asteroid) => {
-    asteroid.attr("cx", -50)
-    return asteroid
+
+  // LOGIC FOR ASTEROID COLLIDING WITH EDGE
+
+  gameObservable
+  .map(() => ({
+    asteroidX: Number(asteroid.attr("cx")),
+    asteroidY: Number(asteroid.attr("cy")),
+    asteroidR: Number(asteroid.attr("r"))
+  }))
+  .filter(({asteroidX, asteroidY, asteroidR}) => (
+    (asteroidX >= 600 || asteroidX <= 0) && (asteroidY >= 600 || asteroidY <= 0 )
+  ))
+  .subscribe(() => {
+    directionX *= -1
+    directionY *= -1
   })
-  .filter((asteroid) => (asteroid.attr("cx") < -50))
-  .map((asteroid) => {
-    asteroid.attr("cx", 650)
-    return asteroid
-  })
-  .filter((asteroid) => asteroid.attr("cy") > 650)
-  .map((asteroid) => {
-    asteroid.attr("cy", -50)
-    return asteroid
-  })
-  .filter((asteroid) => asteroid.attr("cy") < 50)
-  .map((asteroid) => {
-    asteroid("cy", 600 + 50)
-    return asteroid
-  })
-  .filter((asteroid) => (asteroid.attr("cy") < 600))
-  .subscribe((asteroid) => console.log)
 
 
-    // .subscribe((asteroid) => console.log(asteroid.attr("cx")))
+  // gameObservable.map(() => (
+  //   {asteroidX: Number(asteroid.attr("cx")),
+  //   asteroidY: Number(asteroid.attr("cy")),
+  //   asteroidR: Number(asteroid.attr("r"))  
+  //   }
+  // ).filter(({asteroidX, asteroidY, asteroidR}) => (
+    
+  // ))
+  
+  // )
+
+  // Observable.interval(100)
+  // .takeUntil(Observable.interval(10000))
+  // .map(() => {
+  //   asteroid.attr("asteroidVelocityX", randomDirectionX) // set the velocity for x
+  //   asteroid.attr("asteroidVelocityY", randomDirectionY) // set the velocity for y
+  //   asteroid.attr("cx", (directionX * asteroid.attr("asteroidVelocityX")) + Number(asteroid.attr("cx"))); // the ball should go towards the left or the right
+  //   asteroid.attr("cy", (directionY * asteroid.attr("asteroidVelocityY")) + Number(asteroid.attr("cy"))); // the ball should go up or down
+  //   return asteroid
+  // })
+  // .map((asteroid) => ({
+  //   asteroid,
+  //   asteroidX: Number(asteroid.attr("cx")),
+  //   asteroidY: Number(asteroid.attr("cy")),
+  //   asteroidR: Number(asteroid.attr("r"))}))
+  //   .filter(({asteroidX, asteroidY, asteroidR}) => {
+  //     (asteroidX > 600 || asteroidX < 0)
+  //   })
+  //     .subscribe(() =>{
+  //     asteroid.attr("asteroidVelocityX", Number(asteroid.attr("asteroidVelocityX") * -1))
+  //     asteroid.attr("cx", (directionX * asteroid.attr("asteroidVelocityX")) + Number(asteroid.attr("cx")))
+  //     asteroid.attr("asteroidVelocityY", Number(asteroid.attr("asteroidVelocityX") * -1))// reverse the velocity
+  //     asteroid.attr("cx", (directionY * asteroid.attr("asteroidVelocityY")) + Number(asteroid.attr("cy")))
+  // })
+  
+  // .filter(({asteroidX, asteroidY, asteroidR}) => {
+  //   (asteroidX <= -20 || asteroidX > 610)
+  //   console.log("true")
+    // (asteroidX <= -20 || asteroidX >= 620) && (asteroidY > -20 || asteroidY < 620)
+  // }).subscribe(() => console.log("true"))
+  // .subscribe(() =>{
+  //   asteroid.attr("asteroidVelocityX", Number(asteroid.attr("asteroidVelocityX") * -1)
+  //   asteroid.attr("asteroidVelocityY" Number(asteroid.attr("asteroidVelocityX") * -1)// reverse the velocity
+  // }
+  
+
+
+  
+    // )).subscribe((asteroidX, asteroidY, asteroidR) => {
+  //   console.log(asteroidX, asteroidY, asteroidR)
+  // })
 
 
   // Observable.interval(10)
@@ -138,10 +167,8 @@ function asteroids() {
     .filter((key) => (key == "ArrowLeft"))
     .scan(0, (acc, curr) => acc + 10) // Don't need a scan
     .subscribe(() => {
-      // const rotation = shipMove[3] = Number(shipMove[3] - 10)
       g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 10})`)
-    }
-    )
+    })
 
   // movement right
   keydown$
@@ -151,7 +178,6 @@ function asteroids() {
     .filter((key) => (key == "ArrowRight"))
     .scan(0, (acc, curr) => acc + 10)
     .subscribe(() => {
-      // const rotation = shipMove[3] = Number(shipMove[3] + 10)
       g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 10})`)
     })
 
@@ -207,13 +233,11 @@ function asteroids() {
           currBullet.currBullet.attr("cy", bulletDistanceY + bulletY)
         })
     })
+  }
 
     // delete the element using
     // element.remove 
 //parent.remove(child)
-
-
-}
 
 // logic for asteroid destroying 
 // const checkIfOnscreen = (bullet) => {

@@ -48,12 +48,6 @@ function asteroids() {
     .attr("cy", 20)
     .attr("r", 50)
 
-  let asteroid2 = new Elem(svg, "circle")
-    .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
-    .attr("cx", 400) // follow where the arrow is
-    .attr("cy", 200)
-    .attr("r", 50)
-
   // keep track of ship coordinates (translate x, translate y, rotation)
   let translateX = Number(shipMove[1])
   let translateY = Number(shipMove[2])
@@ -179,20 +173,6 @@ function asteroids() {
       // const distanceY       = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
       g.attr("transform", `translate(${translateX = translateX + x} ${translateY = translateY + y}) rotate(${rotation})`)
     })
-
-
-    
-  // keydown.map(({key}) => key)
-  // .filter((key) => key == "ArrowUp")
-  // .map((key) => ({vx: Math.cos(Math.PI * (rotate - 90)/180), vy: Math.sin(Math.PI * (rotate - 90)/180)}))
-  // .flatMap(({vx, vy}) => 
-  //   Observable.interval(50)
-  //   .map(t => ({x: 300 * vx/t, y: 300 * vy/t})))
-  // .subscribe(({x,y}) => {
-  //   console.log(x,y);
-  //   console.log(rotate);
-  //   g.attr("transform", translate(${posX = posX + x} ${posY = posY + y}) rotate(${rotate}) )}
-  //   )
 
   // reduce observables into an array  -> takes emissions from observable and reduces them too initial value
   // keep time and user input int oobservables and do merge etc.. combine etc... 

@@ -16,11 +16,6 @@ function asteroids() {
         .attr("cx", 300)
         .attr("cy", 20)
         .attr("r", 50);
-    let asteroid2 = new Elem(svg, "circle")
-        .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
-        .attr("cx", 400)
-        .attr("cy", 200)
-        .attr("r", 50);
     let translateX = Number(shipMove[1]);
     let translateY = Number(shipMove[2]);
     let rotation = Number(shipMove[3]);

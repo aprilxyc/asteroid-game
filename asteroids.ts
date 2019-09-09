@@ -301,24 +301,52 @@ function asteroids() {
   //   console.log(returnArray)
   // })
 
+  /* THIS REMOVES THE BULLET WHEN COLLISION */ 
   gameObservable.map(x => ({
     x,
     myBulletArray  : bulletsArray,
     myAsteroidArray: asteroidArray
   })).map(({x, myBulletArray, myAsteroidArray}) => (
-      myAsteroidArray.filter((asteroid) => (
-      myBulletArray.filter((bullet) => (
+      myAsteroidArray.filter(asteroid => (
+      myBulletArray.filter(bullet => (
+
         checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))
-      ))
+      
+        ))
       .map(bullet => (
         bullet.elem.remove()
     ))))
   ))
   .subscribe((returnArray) => (
-    console.log(returnArray)
+    console.log
+    // console.log(returnArray)
     // returnArray.forEach((item) => item.elem.remove())
   ))
+ 
+/*  THIS REMOVES THE ASTEROIDS WHEN COLLISION*/
+gameObservable.map(x => ({
+  x,
+  myBulletArray  : bulletsArray,
+  myAsteroidArray: asteroidArray
+})).map(({x, myBulletArray, myAsteroidArray}) => (
+    myBulletArray.filter(bullet => (
+    myAsteroidArray.filter(asteroid => (
+
+      checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))
+    
+      ))
+    .map(asteroid => (
+      asteroid.elem.remove()
+  ))))
+))
+.subscribe((returnArray) => (
+  console.log
+  // console.log(returnArray)
+  // returnArray.forEach((item) => item.elem.remove())
+))
 }
+
+
 
 
 

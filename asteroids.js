@@ -105,9 +105,16 @@ function asteroids() {
         x,
         myBulletArray: bulletsArray,
         myAsteroidArray: asteroidArray
-    })).map(({ x, myBulletArray, myAsteroidArray }) => (myAsteroidArray.filter((asteroid) => (myBulletArray.filter((bullet) => (checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))))
+    })).map(({ x, myBulletArray, myAsteroidArray }) => (myAsteroidArray.filter(asteroid => (myBulletArray.filter(bullet => (checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))))
         .map(bullet => (bullet.elem.remove()))))))
-        .subscribe((returnArray) => (console.log(returnArray)));
+        .subscribe((returnArray) => (console.log));
+    gameObservable.map(x => ({
+        x,
+        myBulletArray: bulletsArray,
+        myAsteroidArray: asteroidArray
+    })).map(({ x, myBulletArray, myAsteroidArray }) => (myBulletArray.filter(bullet => (myAsteroidArray.filter(asteroid => (checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))))
+        .map(asteroid => (asteroid.elem.remove()))))))
+        .subscribe((returnArray) => (console.log));
 }
 if (typeof window != 'undefined')
     window.onload = () => {

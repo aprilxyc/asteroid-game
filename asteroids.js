@@ -98,12 +98,12 @@ function asteroids() {
         .map(({ key }) => {
         return key;
     })
-        .filter((key) => (key == "ArrowUp"))
-        .subscribe(() => {
-        const rotationRadians = rotation * (Math.PI / 180);
-        const distanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10;
-        const distanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10;
-        g.attr("transform", `translate(${translateX = translateX + distanceX} ${translateY = translateY + distanceY}) rotate(${rotation})`);
+        .filter((key) => key == "ArrowUp")
+        .map((key) => ({ vx: Math.cos(Math.PI * (rotation - 90) / 180), vy: Math.sin(Math.PI * (rotation - 90) / 180) }))
+        .flatMap(({ vx, vy }) => Observable.interval(50)
+        .map(t => ({ x: 300 * vx / t, y: 300 * vy / t })))
+        .subscribe(({ x, y }) => {
+        g.attr("transform", `translate(${translateX = translateX + x} ${translateY = translateY + y}) rotate(${rotation})`);
     });
     let bulletsArray = [];
     keydown$

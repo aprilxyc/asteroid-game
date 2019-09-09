@@ -139,9 +139,9 @@ function asteroids() {
       asteroid.attr("cy", 600 + 10)
     })
 
+  // Logic for movement
 
 
-    
   // movement left
   keydown$ // get the repeat object and take it once itis true
     .map(({ key }) => {
@@ -167,13 +167,32 @@ function asteroids() {
     .map(({ key }) => {
       return key
     })
-    .filter((key) => (key == "ArrowUp"))
-    .subscribe(() => {
-      const rotationRadians = rotation * (Math.PI / 180)
-      const distanceX       = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10
-      const distanceY       = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
-      g.attr("transform", `translate(${translateX = translateX + distanceX} ${translateY = translateY + distanceY}) rotate(${rotation})`)
+    .filter((key) => key == "ArrowUp")
+    .map((key) => ({vx: Math.cos(Math.PI * (rotation - 90)/180), vy: Math.sin(Math.PI * (rotation - 90)/180)}))
+    .flatMap(({vx, vy}) => 
+      Observable.interval(50)
+      .map(t => ({x: 300 * vx/t, y: 300 * vy/t})))
+    .subscribe(({x, y}) => {
+      // original stuff
+      // const rotationRadians = rotation * (Math.PI / 180)
+      // const distanceX       = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10
+      // const distanceY       = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
+      g.attr("transform", `translate(${translateX = translateX + x} ${translateY = translateY + y}) rotate(${rotation})`)
     })
+
+
+    
+  // keydown.map(({key}) => key)
+  // .filter((key) => key == "ArrowUp")
+  // .map((key) => ({vx: Math.cos(Math.PI * (rotate - 90)/180), vy: Math.sin(Math.PI * (rotate - 90)/180)}))
+  // .flatMap(({vx, vy}) => 
+  //   Observable.interval(50)
+  //   .map(t => ({x: 300 * vx/t, y: 300 * vy/t})))
+  // .subscribe(({x,y}) => {
+  //   console.log(x,y);
+  //   console.log(rotate);
+  //   g.attr("transform", translate(${posX = posX + x} ${posY = posY + y}) rotate(${rotate}) )}
+  //   )
 
   // reduce observables into an array  -> takes emissions from observable and reduces them too initial value
   // keep time and user input int oobservables and do merge etc.. combine etc... 

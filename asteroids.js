@@ -4,6 +4,7 @@ function asteroids() {
     let gameTimer = 150, gameComplete = false;
     const gameObservable = Observable.interval(gameTimer).filter(() => !gameComplete);
     const asteroidObservable = Observable.interval(1);
+    const movementObservable = Observable.interval(1);
     const asteroidsScores = {
         score: 0
     };
@@ -26,7 +27,7 @@ function asteroids() {
         let asteroidRandomX = getRandomInt(0, 250);
         let asteroidRandomY = getRandomInt(0, 400);
         let asteroid = new Elem(svg, "circle")
-            .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
+            .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
             .attr("cx", asteroidRandomX)
             .attr("cy", asteroidRandomY)
             .attr("r", 50)
@@ -42,7 +43,7 @@ function asteroids() {
     })
         .filter((key) => (key == "ArrowLeft"))
         .subscribe(() => {
-        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 10})`);
+        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 20})`);
     });
     keydown$
         .map(({ key }) => {
@@ -50,7 +51,7 @@ function asteroids() {
     })
         .filter((key) => (key == "ArrowRight"))
         .subscribe(() => {
-        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 10})`);
+        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 20})`);
     });
     keydown$
         .map(({ key }) => {
@@ -79,7 +80,7 @@ function asteroids() {
             .attr("cy", translateY)
             .attr("r", 4);
         bulletsArray.push(bulletShot);
-        let currentState = Observable.interval(100).map(x => ({ x, currBullet: bulletShot }));
+        let currentState = Observable.interval(50).map(x => ({ x, currBullet: bulletShot }));
         currentState
             .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) > 600 || (Number(currBullet.currBullet.attr("cy")) > 600) || (Number(currBullet.currBullet.attr("cy")) < 0) || Number(currBullet.currBullet.attr("cx")) < 0)
             .subscribe((currBullet) => {
@@ -116,7 +117,11 @@ function asteroids() {
         myBulletArray: bulletsArray,
         myAsteroidArray: asteroidArray
     })).map(({ x, myBulletArray, myAsteroidArray }) => (myBulletArray.filter(bullet => (myAsteroidArray.filter(asteroid => (checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))))
-        .map(asteroid => (asteroidArray.splice(asteroid.attr("index"), 1) && asteroid.elem.remove()))))))
+        .map(asteroid => {
+        const index = asteroidArray.findIndex(item => item.attr("index") == asteroid.attr("index"));
+        asteroidArray.splice(index, 1);
+        asteroid.elem.remove();
+    })))))
         .subscribe((returnArray) => (console.log(asteroidArray)));
 }
 if (typeof window != 'undefined')

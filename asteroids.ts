@@ -18,7 +18,9 @@ function asteroids() {
   let   gameTimer          = 150,
         gameComplete       = false
   const gameObservable     = Observable.interval(gameTimer).filter(() => !gameComplete)
-  const asteroidObservable = Observable.interval(1)     
+  const asteroidObservable = Observable.interval(1)   
+  // created for movement
+  const movementObservable = Observable.interval(1) // checks every 1 second for movement  
   const asteroidsScores = {
       score: 0 
   }                                 // create the asteroids
@@ -45,7 +47,6 @@ function asteroids() {
   let translateX = Number(shipMove[1])
   let translateY = Number(shipMove[2])
   let rotation   = Number(shipMove[3])
-  
 
   // create ship svg
   let ship = new Elem(svg, 'polygon', g.elem)
@@ -65,18 +66,14 @@ function asteroids() {
 
       // create asteriod svg
       let asteroid = new Elem(svg, "circle")
-      .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
+      .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
       .attr("cx", asteroidRandomX) // follow where the arrow is
       .attr("cy", asteroidRandomY)
       .attr("r", 50)
       .attr("index", asteroidIndex++) // save the index so we can remove it later
-      // console.log(asteroidRandomX)
-      // console.log(asteroidRandomY)
 
       // push asteroid into array
       asteroidArray.push(asteroid)
-
-      // console.log(asteroidArray)
 
     })
 
@@ -165,6 +162,7 @@ function asteroids() {
 
 
 /* LOGIC FOR SPACESHIP MOVEMENT */
+
   // movement left
   keydown$ // get the repeat object and take it once itis true
     .map(({ key }) => {
@@ -172,7 +170,7 @@ function asteroids() {
     })
     .filter((key) => (key == "ArrowLeft"))
     .subscribe(() => {
-      g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 10})`)
+      g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 20})`)
     })
 
   // movement right
@@ -182,7 +180,7 @@ function asteroids() {
     })
     .filter((key) => (key == "ArrowRight"))
     .subscribe(() => {
-      g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 10})`)
+      g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 20})`)
     })
 
   // movement up
@@ -228,7 +226,7 @@ function asteroids() {
       bulletsArray.push(bulletShot)
 
       // save the state
-      let currentState = Observable.interval(100).map(x => ({ x, currBullet: bulletShot }))
+      let currentState = Observable.interval(50).map(x => ({ x, currBullet: bulletShot }))
 
       //Number(currBullet.currBullet.attr("cx")) >= 550 || (Number(currBullet.currBullet.attr("cy")) >= 550) || (Number(currBullet.currBullet.attr("cy")) <= 0) || Number(currBullet.currBullet.attr("cx")) < 0)
       currentState
@@ -306,7 +304,7 @@ function asteroids() {
         checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))
         ))
       .map(bullet => (
-        bullet.elem.remove()
+        bullet.elem.remove() // need to also remove the bullet element!!
     ))))
   ))
   .subscribe((returnArray) => (
@@ -326,11 +324,12 @@ gameObservable.map(x => ({
     myAsteroidArray.filter(asteroid => (
       checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))
       ))
-    .map(asteroid => (
-      // remove the elementt's canvasa
-      asteroidArray.splice(asteroid.attr("index"), 1) && asteroid.elem.remove() // remove the element KINDA WORKS NOT REALLY
-    ))))
-))
+    .map(asteroid => {
+      const index = asteroidArray.findIndex(item => item.attr("index") == asteroid.attr("index")) // get index of asteroiod in array
+      asteroidArray.splice(index, 1) // remove collided asteroid IMPURE
+      asteroid.elem.remove() // remove it from canvas
+    }))))
+)
 .subscribe((returnArray) => (
   console.log(asteroidArray)
   // console.log(returnArray)

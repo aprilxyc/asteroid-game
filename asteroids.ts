@@ -139,6 +139,9 @@ function asteroids() {
       asteroid.attr("cy", 600 + 10)
     })
 
+
+
+    
   // movement left
   keydown$ // get the repeat object and take it once itis true
     .map(({ key }) => {
@@ -186,7 +189,6 @@ function asteroids() {
     })
     .filter((key) => (key == " "))
     .subscribe((e) => {
-      console.log(e)
       const rotationRadians = rotation * (Math.PI / 180)
       const bulletDistanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10
       const bulletDistanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10
@@ -240,6 +242,20 @@ function asteroids() {
   // by drawing a bullet
   // diffrence in x^2 and difference in y^2 and if that is less than yuor radius 
 
+  function checkCollision(x1: number, x2: number, y1: number, y2: number, radius1:number, radius2: number) {
+    // console.log("x1: " + x1)
+    // console.log("x2: " + x2)
+    // console.log("y1: " + y1)
+    // console.log("y2: " + y2)
+
+    let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2)))
+    let sumOfRadii = (radius1 + radius2)
+    // console.log("line of distance: " + lineOfDistance)
+    // console.log("radius " + sumOfRadii)
+    console.log(lineOfDistance <= sumOfRadii)
+    return lineOfDistance <= sumOfRadii
+  }
+
 
   gameObservable.map((x) => ({
     time       : x,
@@ -259,53 +275,89 @@ function asteroids() {
     currAsteroid: asteroid,
     bulletArray  : bulletsArray
   })).map((e) => {
-    return e.bulletArray.forEach((bullet) => {
-      let asteroidXCircle = Number(e.currAsteroid.attr("cx"))
-      let asteroidYCircle = Number(e.currAsteroid.attr("cy"))
-      let asteroidRadius = Number(e.currAsteroid.attr("r"))
-      let bulletXCircle = Number(bullet.attr("cx"))
-      let bulletYCircle = Number(bullet.attr("cy"))
-      let bulletRadius = Number(bullet.attr("r"))
+    
+  let asteroidXCircle = Number(e.currAsteroid.attr("cx"))
+  let asteroidYCircle = Number(e.currAsteroid.attr("cy"))
+  let asteroidRadius = Number(e.currAsteroid.attr("r"))
 
-      let lineDistance = Math.sqrt( Math.pow((asteroidXCircle - bulletXCircle), 2) + Math.pow((asteroidYCircle - bulletYCircle), 2))
+  return e.bulletArray.filter((bullet) => (
+    checkCollision(Number(bullet.attr("cx")), asteroidXCircle, Number(bullet.attr("cy")), asteroidYCircle, asteroidRadius, Number(bullet.attr("r")))
+  ))})
+  .subscribe((returnArray) => {
+    returnArray.forEach((element) => element.elem.remove())
+    console.log(returnArray)
+    // asteroid2.elem.remove()
+  })
 
-      return bulletXCircle
-    })
-  }).subscribe((bulletXCircle) => console.log(bulletXCircle))
+
+  //     return e.bulletArray.forEach((bullet) => {
+//       let asteroidXCircle = Number(e.currAsteroid.attr("cx"))
+//       let asteroidYCircle = Number(e.currAsteroid.attr("cy"))
+//       let asteroidRadius = Number(e.currAsteroid.attr("r"))
+//       let bulletXCircle = Number(bullet.attr("cx"))
+//       let bulletYCircle = Number(bullet.attr("cy"))
+//       let bulletRadius = Number(bullet.attr("r"))
+
+//       return Math.sqrt( Math.pow((asteroidXCircle - bulletXCircle), 2) + Math.pow((asteroidYCircle - bulletYCircle), 2))
+//     })
+//   }).subscribe((bullet) => console.log(bullet))
+// }
+
+
 }
 
+
+//   gameObservable.map(x => ({
+//     x,
+//     currAsteroid: asteroid,
+//     bulletArray  : bulletsArray
+//   })).map((e) => {
+
+//   let asteroidXCircle = Number(e.currAsteroid.attr("cx"))
+//   let asteroidYCircle = Number(e.currAsteroid.attr("cy"))
+//   let asteroidRadius = Number(e.currAsteroid.attr("r"))
+
+//   return e.bulletArray.forEach((bullet),
+    
+//   })
+// }).subscribe((e) => ({
+//   currAsteroid.elem.remove()
+// }))
+// let bulletXCircle = Number(bullet.attr("cx"))
+// let bulletYCircle = Number(bullet.attr("cy"))
+// let bulletRadius = Number(bullet.attr("r"))
+
+//     return e.bulletArray.forEach((bullet) => {
+//       let asteroidXCircle = Number(e.currAsteroid.attr("cx"))
+//       let asteroidYCircle = Number(e.currAsteroid.attr("cy"))
+//       let asteroidRadius = Number(e.currAsteroid.attr("r"))
+//       let bulletXCircle = Number(bullet.attr("cx"))
+//       let bulletYCircle = Number(bullet.attr("cy"))
+//       let bulletRadius = Number(bullet.attr("r"))
+
+//       return Math.sqrt( Math.pow((asteroidXCircle - bulletXCircle), 2) + Math.pow((asteroidYCircle - bulletYCircle), 2))
+//     })
+//   }).subscribe((bullet) => console.log(bullet))
+// }
 
   // distance of two things and add their radii together and compare 
   // if that line distance is smaller or equal to othe radius of the two things added toogehter htan it will collide
 
-
-
-  // .subscribe(() => {
-
   // one interval that updates every 10 milliseconods, controols whole game
-
 
 
   // array of 1. It's pure and if you add 2 to it it is still pure as long as long as you work with 1 and not set
   // it. So everytime you add something, you need too directly manipulate it everything. Create a new array
   // scan is an observable of all the intermediate states. So you don't just ge the last state, you get every state. 
 
-
-
-
-
-
 // For asteroids, absolute distance must be smaller than sum of the radii then they have collided
 
+  // bounding client stuff in ship. Get rectangele that bounds yuor traignle. getbbbox (elements inside svg -- this is svg method)
+  // getBBbox gives it to you in svg cooridnates. That giives yoouo a swuare, then you can do the same thing on your asteroid.
+  // Then its the code from oone of the lectures - two squares overlapping. 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')
   window.onload = () => {
     asteroids();
   }
 
-
-
-
-  // bounding client stuff in ship. Get rectangele that bounds yuor traignle. getbbbox (elements inside svg -- this is svg method)
-  // getBBbox gives it to you in svg cooridnates. That giives yoouo a swuare, then you can do the same thing on your asteroid.
-  // Then its the code from oone of the lectures - two squares overlapping. 

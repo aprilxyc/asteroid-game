@@ -112,7 +112,6 @@ function asteroids() {
     })
         .filter((key) => (key == " "))
         .subscribe((e) => {
-        console.log(e);
         const rotationRadians = rotation * (Math.PI / 180);
         const bulletDistanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10;
         const bulletDistanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10;
@@ -137,6 +136,12 @@ function asteroids() {
             currBullet.currBullet.attr("cy", bulletDistanceY + bulletY);
         });
     });
+    function checkCollision(x1, x2, y1, y2, radius1, radius2) {
+        let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2)));
+        let sumOfRadii = (radius1 + radius2);
+        console.log(lineOfDistance <= sumOfRadii);
+        return lineOfDistance <= sumOfRadii;
+    }
     gameObservable.map((x) => ({
         time: x,
         bulletArray: bulletsArray
@@ -150,17 +155,15 @@ function asteroids() {
         currAsteroid: asteroid,
         bulletArray: bulletsArray
     })).map((e) => {
-        return e.bulletArray.forEach((bullet) => {
-            let asteroidXCircle = Number(e.currAsteroid.attr("cx"));
-            let asteroidYCircle = Number(e.currAsteroid.attr("cy"));
-            let asteroidRadius = Number(e.currAsteroid.attr("r"));
-            let bulletXCircle = Number(bullet.attr("cx"));
-            let bulletYCircle = Number(bullet.attr("cy"));
-            let bulletRadius = Number(bullet.attr("r"));
-            let lineDistance = Math.sqrt(Math.pow((asteroidXCircle - bulletXCircle), 2) + Math.pow((asteroidYCircle - bulletYCircle), 2));
-            return bulletXCircle;
-        });
-    }).subscribe((bulletXCircle) => console.log(bulletXCircle));
+        let asteroidXCircle = Number(e.currAsteroid.attr("cx"));
+        let asteroidYCircle = Number(e.currAsteroid.attr("cy"));
+        let asteroidRadius = Number(e.currAsteroid.attr("r"));
+        return e.bulletArray.filter((bullet) => (checkCollision(Number(bullet.attr("cx")), asteroidXCircle, Number(bullet.attr("cy")), asteroidYCircle, asteroidRadius, Number(bullet.attr("r")))));
+    })
+        .subscribe((returnArray) => {
+        returnArray.forEach((element) => element.elem.remove());
+        console.log(returnArray);
+    });
 }
 if (typeof window != 'undefined')
     window.onload = () => {

@@ -18,7 +18,10 @@ function asteroids() {
   let   gameTimer          = 150,
         gameComplete       = false
   const gameObservable     = Observable.interval(gameTimer).filter(() => !gameComplete)
-  const asteroidObservable = Observable.interval(1)                                      // create the asteroids
+  const asteroidObservable = Observable.interval(1)     
+  const asteroidsScores = {
+      score: 0 
+  }                                 // create the asteroids
 
   // creates new observable that emits an event object everytime a keydown is fired
   // emits keyboard event everytime user presses down a key
@@ -51,6 +54,7 @@ function asteroids() {
 
   /*  Logic to create asteroids that move randomly -> put them into an array so we can keep track of them */
   let asteroidArray: Elem[] = []  // impure
+  let asteroidIndex = 0
 
   asteroidObservable
     .takeUntil(asteroidObservable.filter(i => i == 5)) // this part taken from Harsil's code
@@ -65,6 +69,7 @@ function asteroids() {
       .attr("cx", asteroidRandomX) // follow where the arrow is
       .attr("cy", asteroidRandomY)
       .attr("r", 50)
+      .attr("index", asteroidIndex++) // save the index so we can remove it later
       // console.log(asteroidRandomX)
       // console.log(asteroidRandomY)
 
@@ -217,7 +222,7 @@ function asteroids() {
         .attr("style", "fill:#ffffff;stroke:#ffffff;stroke-width:2")
         .attr("cx", translateX) // follow where the arrow is
         .attr("cy", translateY)
-        .attr("r", 4)
+        .attr("r", 4) 
 
       // add bullets into an array
       bulletsArray.push(bulletShot)
@@ -248,21 +253,10 @@ function asteroids() {
   // LOGIC TO REMOVE ASTEROIDS OFFSCREEN FROM ARRAY
 /* Function to check if the bullet has collided with the asteroid. */
   function checkCollision(x1: number, x2: number, y1: number, y2: number, radius1: number, radius2: number) {
-    // console.log("x1: " + x1)
-    // console.log("x2: " + x2)
-    // console.log("y1: " + y1)
-    // console.log("y2: " + y2)
-    // console.log("radius1: " + radius1)
-    // console.log("radius2: " + radius2)
-
-    let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2)))
-    let sumOfRadii     = (radius1 + radius2)
-    // console.log("line of distance: " + lineOfDistance)
-    // console.log("radius " + sumOfRadii)
-    console.log(lineOfDistance <= sumOfRadii)
+    let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))),
+        sumOfRadii     = (radius1 + radius2)
     return lineOfDistance <= sumOfRadii
   }
-
 
   gameObservable.map((x) => ({
     time       : x,
@@ -272,8 +266,8 @@ function asteroids() {
       Number(bulletArray.attr("cx")) <= 600 && (Number(bulletArray.attr("cy")) <= 600) && (Number(bulletArray.attr("cy")) >= 0) && Number(bulletArray.attr("cx")) >= 0
     ))
   }).subscribe(array => (
+    // let bullet array equal new bullet array with only bullets that are onscreen
     bulletsArray = array
-    // console.log(bulletsArray)
   ))
 
 
@@ -301,7 +295,7 @@ function asteroids() {
   //   console.log(returnArray)
   // })
 
-  /* THIS REMOVES THE BULLET WHEN COLLISION */ 
+  /* THIS REMOVES THE BULLET WHEN THERE IS A COLLISION */ 
   gameObservable.map(x => ({
     x,
     myBulletArray  : bulletsArray,
@@ -309,9 +303,7 @@ function asteroids() {
   })).map(({x, myBulletArray, myAsteroidArray}) => (
       myAsteroidArray.filter(asteroid => (
       myBulletArray.filter(bullet => (
-
         checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))
-      
         ))
       .map(bullet => (
         bullet.elem.remove()
@@ -324,6 +316,7 @@ function asteroids() {
   ))
  
 /*  THIS REMOVES THE ASTEROIDS WHEN COLLISION*/
+// need to remove the asteroid itself now
 gameObservable.map(x => ({
   x,
   myBulletArray  : bulletsArray,
@@ -331,23 +324,38 @@ gameObservable.map(x => ({
 })).map(({x, myBulletArray, myAsteroidArray}) => (
     myBulletArray.filter(bullet => (
     myAsteroidArray.filter(asteroid => (
-
       checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))
-    
       ))
     .map(asteroid => (
-      asteroid.elem.remove()
-  ))))
+      // remove the elementt's canvasa
+      asteroidArray.splice(asteroid.attr("index"), 1) && asteroid.elem.remove() // remove the element KINDA WORKS NOT REALLY
+    ))))
 ))
 .subscribe((returnArray) => (
-  console.log
+  console.log(asteroidArray)
   // console.log(returnArray)
   // returnArray.forEach((item) => item.elem.remove())
 ))
+
+// harsil's score code
+/**
+ *
+//  * @param score1 player1's score
+//  * @param score2 player2's score
+//  * @param maxScore the max achievable score
+//  */
+// function scored(score1: number, score2: number, maxScore: number) {
+//   const score: HTMLElement = document.getElementById("score")!;
+//   score.innerHTML = `${getEmojiNumber(score1)} : ${getEmojiNumber(score2)}`;
+//   const result: HTMLElement = document.getElementById("result")!;
+
+//   // if the score reaches max score then print a congratulating message
+//   if (score2 == maxScore) {
+//     result.innerHTML = "Congratulations Player 2 ";
+//   } else if (score1 == maxScore) {
+//     result.innerHTML = "Congratulations Player 1 ";
+//   }
 }
-
-
-
 
 
 

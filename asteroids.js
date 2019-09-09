@@ -4,6 +4,9 @@ function asteroids() {
     let gameTimer = 150, gameComplete = false;
     const gameObservable = Observable.interval(gameTimer).filter(() => !gameComplete);
     const asteroidObservable = Observable.interval(1);
+    const asteroidsScores = {
+        score: 0
+    };
     const keydown$ = Observable.fromEvent(document, 'keydown');
     const keyup$ = Observable.fromEvent(document, 'keyup');
     let g = new Elem(svg, 'g')
@@ -16,6 +19,7 @@ function asteroids() {
         .attr("points", "-15,20 15,20 0,-30")
         .attr("style", "fill:#f4e46c;stroke:#f4e46c;stroke-width:1");
     let asteroidArray = [];
+    let asteroidIndex = 0;
     asteroidObservable
         .takeUntil(asteroidObservable.filter(i => i == 5))
         .subscribe((e) => {
@@ -25,7 +29,8 @@ function asteroids() {
             .attr("style", "fill:#9bd5bd;stroke:#9bd5bd;stroke-width:2")
             .attr("cx", asteroidRandomX)
             .attr("cy", asteroidRandomY)
-            .attr("r", 50);
+            .attr("r", 50)
+            .attr("index", asteroidIndex++);
         asteroidArray.push(asteroid);
     });
     function getRandomInt(min, max) {
@@ -90,9 +95,7 @@ function asteroids() {
         });
     });
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
-        let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2)));
-        let sumOfRadii = (radius1 + radius2);
-        console.log(lineOfDistance <= sumOfRadii);
+        let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
         return lineOfDistance <= sumOfRadii;
     }
     gameObservable.map((x) => ({
@@ -113,8 +116,8 @@ function asteroids() {
         myBulletArray: bulletsArray,
         myAsteroidArray: asteroidArray
     })).map(({ x, myBulletArray, myAsteroidArray }) => (myBulletArray.filter(bullet => (myAsteroidArray.filter(asteroid => (checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))))
-        .map(asteroid => (asteroid.elem.remove()))))))
-        .subscribe((returnArray) => (console.log));
+        .map(asteroid => (asteroidArray.splice(asteroid.attr("index"), 1) && asteroid.elem.remove()))))))
+        .subscribe((returnArray) => (console.log(asteroidArray)));
 }
 if (typeof window != 'undefined')
     window.onload = () => {

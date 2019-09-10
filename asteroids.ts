@@ -346,10 +346,11 @@ function asteroids() {
       shipTransformX: shipTransformX,
       shipTransformY: shipTransformY
     })}).forEach(({asteroidArray, shipTransformX, shipTransformY}) => asteroidArray.filter((asteroid) => 
-      checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))
-    ).map((e) => (
-      gameComplete = true
-    ))
+      checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))
+    ).map((e) => {
+      gameComplete = true;
+      ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
+    })
     )
   .subscribe(() => console.log)
   

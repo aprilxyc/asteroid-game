@@ -160,18 +160,17 @@ function asteroids() {
   //     // used to get a random integer for asteroid random movementts
   //     // inspired by: https://stackoverflow.com/questions/52015418/random-movement-angular
   function getRandomInt(min: number, max: number) {
-    console.log(Math.floor((Math.random() + min) * Math.floor(max))
     return Math.floor((Math.random() + min) * Math.floor(max));
   }
 
-//   function getDirection() {
-//     return getRandomInt(0, 2) === 0? -1 : 1; 
-// }
+  function getDirection() {
+    return getRandomInt(0, 2) === 0? -1 : 1; 
+}
 
-  let velocityX = getRandomInt(0, 2);  // the number will be between -8 and 8 excluding 0
-  let velocityY = getRandomInt(0, 2);  // same here
-  let directionX = Math.random();
-  let directionY = Math.random();
+  let x_velocity = getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
+  let y_velocity = getRandomInt(1,8); // same here
+  let directionX = getDirection()
+  let directionY = getDirection()
 
 
   //     /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
@@ -189,6 +188,8 @@ function asteroids() {
         .attr("cy", asteroidRandomY)
         .attr("r", 50)
         .attr("splitCounter", 3)
+
+      console.log(asteroid)
 
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
@@ -234,23 +235,22 @@ function asteroids() {
   }).subscribe(() => console.log)
 
   /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
-  // mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-  //   asteroidArray.forEach((asteroid) => 
-  //     asteroid.attr("cx", (directionX * velocityX) + parseFloat(asteroid.attr("cx")))
-  //     .attr("cy", (directionY * velocityY) + parseFloat(asteroid.attr("cy"))))
-  // })
-
-
+  mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
+    asteroidArray.forEach((asteroid) => 
+      asteroid.attr("cx", Math.random() * getDirection() + parseFloat(asteroid.attr("cx")))
+      .attr("cy", Math.random() * getDirection() + parseFloat(asteroid.attr("cy")))
+      )
+  })
 
 
 
 
 
   // // // LOGIC FOR ASTEROID MOVING RANDOMLY
-  // // mainAsteroidObservable.subscribe(() => {
-  // //   asteroid.attr("cx", directionX * velocityX + Number(asteroid.attr("cx")))  // the ball should go towards the left or the right
-  // //   asteroid.attr("cy", directionY * velocityY + Number(asteroid.attr("cy"))) // the ball should go up or down
-  // // })
+  // mainAsteroidObservable.subscribe(() => {
+  //   asteroid.attr("cx", directionX * velocityX + Number(asteroid.attr("cx")))  // the ball should go towards the left or the right
+  //   asteroid.attr("cy", directionY * velocityY + Number(asteroid.attr("cy"))) // the ball should go up or down
+  // })
 
 
 

@@ -93,13 +93,15 @@ function asteroids() {
         return lineOfDistance <= sumOfRadii;
     }
     function getRandomInt(min, max) {
-        console.log(Math.floor((Math.random() + min) * Math.floor(max)));
         return Math.floor((Math.random() + min) * Math.floor(max));
     }
-    let velocityX = getRandomInt(0, 2);
-    let velocityY = getRandomInt(0, 2);
-    let directionX = Math.random();
-    let directionY = Math.random();
+    function getDirection() {
+        return getRandomInt(0, 2) === 0 ? -1 : 1;
+    }
+    let x_velocity = getRandomInt(1, 8);
+    let y_velocity = getRandomInt(1, 8);
+    let directionX = getDirection();
+    let directionY = getDirection();
     mainAsteroidsObservable.
         takeUntil(asteroidObservable.filter(i => i == 10))
         .subscribe((e) => {
@@ -111,6 +113,7 @@ function asteroids() {
             .attr("cy", asteroidRandomY)
             .attr("r", 50)
             .attr("splitCounter", 3);
+        console.log(asteroid);
         arrayOfAsteroids.push(asteroid);
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
@@ -136,6 +139,10 @@ function asteroids() {
             });
         });
     }).subscribe(() => console.log);
+    mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
+        asteroidArray.forEach((asteroid) => asteroid.attr("cx", Math.random() * getDirection() + parseFloat(asteroid.attr("cx")))
+            .attr("cy", Math.random() * getDirection() + parseFloat(asteroid.attr("cy"))));
+    });
 }
 if (typeof window != 'undefined')
     window.onload = () => {

@@ -151,6 +151,12 @@ function asteroids() {
 
   // Checks for collisons 
   function checkCollision(x1: number, x2: number, y1: number, y2: number, radius1: number, radius2: number) {
+    console.log("x1: " + x1)
+    console.log("x2: " + x2)
+    console.log("y1: " + y1)
+    console.log("y2: " + y2)
+    console.log("radius: " + radius1)
+
     let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))),
         sumOfRadii     = (radius1 + radius2)
     console.log(lineOfDistance <= sumOfRadii)
@@ -334,13 +340,21 @@ function asteroids() {
   
   /* Logic for person colliding with asteroid */
   //TODO FIX THIS
-  mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
-  asteroidArray.filter((asteroid) => (
-    checkCollision( parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))
-  )).subscribe((asteroid) => (
-   console.log("hello")
-  ))
-  })
+  mainAsteroidsObservable.map(({asteroidArray, shipTransformX, shipTransformY}) => {
+    return ({
+      asteroidArray:asteroidArray,
+      shipTransformX: shipTransformX,
+      shipTransformY: shipTransformY
+    })}).forEach(({asteroidArray, shipTransformX, shipTransformY}) => asteroidArray.filter((asteroid) => 
+      checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))
+    ).map((e) => console.log(e))
+    )
+  .subscribe(() => console.log)
+  
+  // .forEach((asteroidArray) => asteroid.filter((asteroid) => 
+  //   checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))
+  // ).map((e) => console.log(e))
+  // ).subscribe((e) => console.log)
 
 }
 

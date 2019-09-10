@@ -89,6 +89,11 @@ function asteroids() {
         });
     });
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
+        console.log("x1: " + x1);
+        console.log("x2: " + x2);
+        console.log("y1: " + y1);
+        console.log("y2: " + y2);
+        console.log("radius: " + radius1);
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
         console.log(lineOfDistance <= sumOfRadii);
         return lineOfDistance <= sumOfRadii;
@@ -183,8 +188,13 @@ function asteroids() {
         .subscribe(() => console.log);
     let polygonTag = document.querySelector("polygon"), polygonBBox = polygonTag.getBBox();
     mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
-        asteroidArray.filter((asteroid) => (checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height)))).subscribe((asteroid) => (console.log("hello")));
-    });
+        return ({
+            asteroidArray: asteroidArray,
+            shipTransformX: shipTransformX,
+            shipTransformY: shipTransformY
+        });
+    }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) => checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))).map((e) => console.log(e)))
+        .subscribe(() => console.log);
 }
 if (typeof window != 'undefined')
     window.onload = () => {

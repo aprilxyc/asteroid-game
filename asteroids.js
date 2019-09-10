@@ -1,98 +1,90 @@
 "use strict";
 function asteroids() {
-    const svg = document.getElementById("canvas");
-    let gameTimer = 150, gameComplete = false;
-    const gameObservable = Observable.interval(gameTimer).filter(() => !gameComplete);
+    const arrayOfAsteroids = [], arrayOfBullets = [];
+    let gameComplete = false;
+    const mainTimer = Observable.interval(5);
     const asteroidObservable = Observable.interval(1);
-    const movementObservable = Observable.interval(1);
-    const asteroidsScores = {
-        score: 0
-    };
+    const mainAsteroidsObservable = mainTimer
+        .takeUntil(mainTimer.filter(_ => gameComplete == true)).map(_ => ({
+        bulletArray: arrayOfBullets,
+        asteroidArray: arrayOfAsteroids,
+        shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+        shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+        shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle)
+    }));
+    const svg = document.getElementById("canvas");
+    const g = new Elem(svg, 'g')
+        .attr("transform", "translate(300 300) rotate(170)");
+    const ship = new Elem(svg, 'polygon', g.elem)
+        .attr("points", "-15,20 15,20 0,-20")
+        .attr("style", "fill:lime;stroke:purple;stroke-width:1");
     const keydown$ = Observable.fromEvent(document, 'keydown');
     const keyup$ = Observable.fromEvent(document, 'keyup');
-    let g = new Elem(svg, 'g')
-        .attr("transform", "translate(300 300) rotate(300)");
-    let shipMove = /translate\((\d+) (\d+)\) rotate\((\d+)\)/.exec(g.attr("transform"));
-    let translateX = Number(shipMove[1]);
-    let translateY = Number(shipMove[2]);
-    let rotation = Number(shipMove[3]);
-    let ship = new Elem(svg, 'polygon', g.elem)
-        .attr("points", "-15,20 15,20 0,-30")
-        .attr("style", "fill:#f4e46c;stroke:#f4e46c;stroke-width:1");
-    let asteroidArray = [];
-    let asteroidIndex = 0;
-    asteroidObservable
-        .takeUntil(asteroidObservable.filter(i => i == 5))
-        .subscribe((e) => {
-        let asteroidRandomX = getRandomInt(0, 250);
-        let asteroidRandomY = getRandomInt(0, 400);
-        let asteroid = new Elem(svg, "circle")
-            .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
-            .attr("cx", asteroidRandomX)
-            .attr("cy", asteroidRandomY)
-            .attr("r", 50)
-            .attr("index", asteroidIndex++);
-        asteroidArray.push(asteroid);
+    keydown$.map(({ key }) => {
+        return ({
+            key,
+            spaceship: g
+        });
+    }).filter(({ key }) => (key == "ArrowRight"))
+        .flatMap((key) => (Observable.interval(15)
+        .takeUntil(keyup$)))
+        .subscribe(({ spaceship }) => {
+        let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
+        g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation + 10})`);
     });
-    function getRandomInt(min, max) {
-        return Math.floor((Math.random() + min) * Math.floor(max));
-    }
-    keydown$
-        .map(({ key }) => {
-        return key;
-    })
-        .filter((key) => (key == "ArrowLeft"))
-        .subscribe(() => {
-        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation - 20})`);
+    keydown$.map(({ key }) => {
+        return ({
+            key,
+            spaceship: g
+        });
+    }).filter(({ key }) => (key == "ArrowLeft"))
+        .flatMap((key) => (Observable.interval(15)
+        .takeUntil(keyup$)))
+        .subscribe(({ spaceship }) => {
+        let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
+        g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation - 10})`);
     });
-    keydown$
-        .map(({ key }) => {
-        return key;
-    })
-        .filter((key) => (key == "ArrowRight"))
-        .subscribe(() => {
-        g.attr("transform", `translate(${translateX} ${translateY}) rotate(${rotation = rotation + 20})`);
-    });
-    keydown$
-        .map(({ key }) => {
-        return key;
-    })
-        .filter((key) => key == "ArrowUp")
-        .map((key) => ({ vx: Math.cos(Math.PI * (rotation - 90) / 180), vy: Math.sin(Math.PI * (rotation - 90) / 180) }))
+    keydown$.map(({ key }) => {
+        return ({
+            key: key,
+            transformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+            transformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+            shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle)
+        });
+    }).filter(({ key, transformX, transformY, shipRotation }) => (key == "ArrowUp"))
+        .map(({ key, transformX, transformY, shipRotation }) => ({ vx: Math.cos(Math.PI * (shipRotation - 90) / 180), vy: Math.sin(Math.PI * (shipRotation - 90) / 180) }))
         .flatMap(({ vx, vy }) => Observable.interval(50)
         .map(t => ({ x: 300 * vx / t, y: 300 * vy / t })))
         .subscribe(({ x, y }) => {
-        g.attr("transform", `translate(${translateX = translateX + x} ${translateY = translateY + y}) rotate(${rotation})`);
+        let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
+        g.attr("transform", `translate(${transformX = transformX + x} ${transformY = transformY + y}) rotate(${shipRotation})`);
     });
-    let bulletsArray = [];
     keydown$
-        .map(({ key }) => {
-        return key;
-    })
-        .filter((key) => (key == " "))
-        .subscribe((e) => {
-        const rotationRadians = rotation * (Math.PI / 180);
-        const bulletDistanceX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 10;
-        const bulletDistanceY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 10;
+        .map(({ key }) => ({
+        key,
+        transformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+        transformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+        shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle),
+    }))
+        .filter(({ key, transformX, transformY, shipRotation }) => (key == " "))
+        .subscribe(({ key, transformX, transformY, shipRotation }) => {
+        const rotationRadians = shipRotation * (Math.PI / 180);
         let bulletShot = new Elem(svg, 'circle')
             .attr("style", "fill:#ffffff;stroke:#ffffff;stroke-width:2")
-            .attr("cx", translateX)
-            .attr("cy", translateY)
-            .attr("r", 4);
-        bulletsArray.push(bulletShot);
-        let currentState = Observable.interval(50).map(x => ({ x, currBullet: bulletShot }));
-        currentState
-            .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) > 600 || (Number(currBullet.currBullet.attr("cy")) > 600) || (Number(currBullet.currBullet.attr("cy")) < 0) || Number(currBullet.currBullet.attr("cx")) < 0)
-            .subscribe((currBullet) => {
-            currBullet.currBullet.elem.remove();
-        });
-        currentState
-            .filter((currBullet) => Number(currBullet.currBullet.attr("cx")) <= 600 && (Number(currBullet.currBullet.attr("cy")) <= 600) && (Number(currBullet.currBullet.attr("cy")) >= 0) && Number(currBullet.currBullet.attr("cx")) >= 0)
-            .subscribe((currBullet) => {
-            let bulletX = Number(currBullet.currBullet.attr("cx"));
-            let bulletY = Number(currBullet.currBullet.attr("cy"));
-            currBullet.currBullet.attr("cx", bulletDistanceX + bulletX);
-            currBullet.currBullet.attr("cy", bulletDistanceY + bulletY);
+            .attr("cx", transformX)
+            .attr("cy", transformY)
+            .attr("r", 4)
+            .attr("bulletDistanceX", Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 1)
+            .attr("bulletDistanceY", Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 1);
+        arrayOfBullets.push(bulletShot);
+    });
+    mainAsteroidsObservable.subscribe(({ bulletArray }) => {
+        bulletArray.map((bullet) => bullet.attr("cx", parseFloat(bullet.attr("cx")) + parseFloat(bullet.attr("bulletDistanceX")))
+            .attr("cy", parseFloat(bullet.attr("cy")) + parseFloat(bullet.attr("bulletDistanceY"))))
+            .filter((bull) => (parseFloat(bull.attr("cx")) >= 600) || parseFloat(bull.attr("cy")) >= 600 || parseFloat(bull.attr("cy")) <= 0 || parseFloat(bull.attr("cx")) <= 0)
+            .forEach((bull) => {
+            bull.elem.remove();
+            arrayOfBullets.splice(arrayOfBullets.indexOf(bull), 1);
         });
     });
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
@@ -100,29 +92,32 @@ function asteroids() {
         console.log(lineOfDistance <= sumOfRadii);
         return lineOfDistance <= sumOfRadii;
     }
-    gameObservable.map((x) => ({
-        time: x,
-        bulletArray: bulletsArray
-    })).map((e) => {
-        return e.bulletArray.filter((bulletArray) => (Number(bulletArray.attr("cx")) <= 600 && (Number(bulletArray.attr("cy")) <= 600) && (Number(bulletArray.attr("cy")) >= 0) && Number(bulletArray.attr("cx")) >= 0));
-    }).subscribe(array => (bulletsArray = array));
-    gameObservable.map(x => ({
-        x,
-        myAsteroidArray: asteroidArray
-    })).map(({ x, myAsteroidArray }) => {
-        return myAsteroidArray.forEach((asteroid) => {
-            let asteroidXCoord = Number(asteroid.attr("cx")), asteroidYCoord = Number(asteroid.attr("cy")), asteroidRadius = Number(asteroid.attr("r"));
-            let bulletCheck = bulletsArray.map((bullet) => {
-                return {
-                    bullet,
-                    bulletXCoord: Number(bullet.attr("cx")),
-                    bulletYCoord: Number(bullet.attr("cy")),
-                    bulletRadius: Number(bullet.attr("r"))
-                };
-            })
-                .filter(({ asteroid, bullet: Elem, bulletXCoord, bulletYCoord, bulletRadius }) => (checkCollision(bulletXCoord, asteroidXCoord, bulletYCoord, asteroidYCoord, asteroidRadius, bulletRadius))).map((e) => (console.log(e)));
+    function getRandomInt(min, max) {
+        return Math.floor((Math.random() + min) * Math.floor(max));
+    }
+    mainAsteroidsObservable.
+        takeUntil(asteroidObservable.filter(i => i == 10))
+        .subscribe((e) => {
+        let asteroidRandomX = getRandomInt(0, 600);
+        let asteroidRandomY = getRandomInt(0, 600);
+        let asteroid = new Elem(svg, "circle")
+            .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+            .attr("cx", asteroidRandomX)
+            .attr("cy", asteroidRandomY)
+            .attr("r", 50);
+        arrayOfAsteroids.push(asteroid);
+    });
+    mainAsteroidsObservable.map(({ bulletArray, asteroidArray }) => {
+        asteroidArray.forEach((asteroid) => {
+            bulletArray.filter((bullet) => (checkCollision(parseFloat(asteroid.attr("cx")), parseFloat(bullet.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(bullet.attr("cy")), parseFloat(bullet.attr("r")), parseFloat(asteroid.attr("r")))))
+                .forEach((bullet) => {
+                bullet.elem.remove();
+                arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
+                asteroid.elem.remove();
+                arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
+            });
         });
-    }).subscribe((e) => (console.log(e)));
+    }).subscribe(() => console.log);
 }
 if (typeof window != 'undefined')
     window.onload = () => {

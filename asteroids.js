@@ -97,6 +97,7 @@ function asteroids() {
     });
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
+        console.log(lineOfDistance <= sumOfRadii);
         return lineOfDistance <= sumOfRadii;
     }
     gameObservable.map((x) => ({
@@ -107,22 +108,21 @@ function asteroids() {
     }).subscribe(array => (bulletsArray = array));
     gameObservable.map(x => ({
         x,
-        myBulletArray: bulletsArray,
         myAsteroidArray: asteroidArray
-    })).map(({ x, myBulletArray, myAsteroidArray }) => (myAsteroidArray.filter(asteroid => (myBulletArray.filter(bullet => (checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))))
-        .map(bullet => (bullet.elem.remove()))))))
-        .subscribe((returnArray) => (console.log));
-    gameObservable.map(x => ({
-        x,
-        myBulletArray: bulletsArray,
-        myAsteroidArray: asteroidArray
-    })).map(({ x, myBulletArray, myAsteroidArray }) => (myBulletArray.filter(bullet => (myAsteroidArray.filter(asteroid => (checkCollision(Number(bullet.attr("cx")), Number(asteroid.attr("cx")), Number(bullet.attr("cy")), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(bullet.attr("r")))))
-        .map(asteroid => {
-        const index = asteroidArray.findIndex(item => item.attr("index") == asteroid.attr("index"));
-        asteroidArray.splice(index, 1);
-        asteroid.elem.remove();
-    })))))
-        .subscribe((returnArray) => (console.log(asteroidArray)));
+    })).map(({ x, myAsteroidArray }) => {
+        return myAsteroidArray.forEach((asteroid) => {
+            let asteroidXCoord = Number(asteroid.attr("cx")), asteroidYCoord = Number(asteroid.attr("cy")), asteroidRadius = Number(asteroid.attr("r"));
+            let bulletCheck = bulletsArray.map((bullet) => {
+                return {
+                    bullet,
+                    bulletXCoord: Number(bullet.attr("cx")),
+                    bulletYCoord: Number(bullet.attr("cy")),
+                    bulletRadius: Number(bullet.attr("r"))
+                };
+            })
+                .filter(({ asteroid, bullet: Elem, bulletXCoord, bulletYCoord, bulletRadius }) => (checkCollision(bulletXCoord, asteroidXCoord, bulletYCoord, asteroidYCoord, asteroidRadius, bulletRadius))).map((e) => (console.log(e)));
+        });
+    }).subscribe((e) => (console.log(e)));
 }
 if (typeof window != 'undefined')
     window.onload = () => {

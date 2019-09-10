@@ -93,8 +93,13 @@ function asteroids() {
         return lineOfDistance <= sumOfRadii;
     }
     function getRandomInt(min, max) {
+        console.log(Math.floor((Math.random() + min) * Math.floor(max)));
         return Math.floor((Math.random() + min) * Math.floor(max));
     }
+    let velocityX = getRandomInt(0, 2);
+    let velocityY = getRandomInt(0, 2);
+    let directionX = Math.random();
+    let directionY = Math.random();
     mainAsteroidsObservable.
         takeUntil(asteroidObservable.filter(i => i == 10))
         .subscribe((e) => {
@@ -104,15 +109,28 @@ function asteroids() {
             .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
             .attr("cx", asteroidRandomX)
             .attr("cy", asteroidRandomY)
-            .attr("r", 50);
+            .attr("r", 50)
+            .attr("splitCounter", 3);
         arrayOfAsteroids.push(asteroid);
     });
+    function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
+        if (asteroid.attr("splitCounter") != 0) {
+            let asteroid = new Elem(svg, "circle")
+                .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+                .attr("cx", asteroidX + 10)
+                .attr("cy", asteroidY + 10)
+                .attr("r", asteroidRadius = asteroidRadius - 10)
+                .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
+            arrayOfAsteroids.push(asteroid);
+        }
+    }
     mainAsteroidsObservable.map(({ bulletArray, asteroidArray }) => {
         asteroidArray.forEach((asteroid) => {
             bulletArray.filter((bullet) => (checkCollision(parseFloat(asteroid.attr("cx")), parseFloat(bullet.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(bullet.attr("cy")), parseFloat(bullet.attr("r")), parseFloat(asteroid.attr("r")))))
                 .forEach((bullet) => {
                 bullet.elem.remove();
                 arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
+                splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")));
                 asteroid.elem.remove();
                 arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
             });

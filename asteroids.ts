@@ -160,11 +160,18 @@ function asteroids() {
   //     // used to get a random integer for asteroid random movementts
   //     // inspired by: https://stackoverflow.com/questions/52015418/random-movement-angular
   function getRandomInt(min: number, max: number) {
+    console.log(Math.floor((Math.random() + min) * Math.floor(max))
     return Math.floor((Math.random() + min) * Math.floor(max));
   }
 
-  //     let velocityX = getRandomInt(0, 2);  // the number will be between -8 and 8 excluding 0
-  //     let velocityY = getRandomInt(0, 2);  // same here
+//   function getDirection() {
+//     return getRandomInt(0, 2) === 0? -1 : 1; 
+// }
+
+  let velocityX = getRandomInt(0, 2);  // the number will be between -8 and 8 excluding 0
+  let velocityY = getRandomInt(0, 2);  // same here
+  let directionX = Math.random();
+  let directionY = Math.random();
 
 
   //     /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
@@ -181,15 +188,30 @@ function asteroids() {
         .attr("cx", asteroidRandomX) // follow where the arrow is
         .attr("cy", asteroidRandomY)
         .attr("r", 50)
+        .attr("splitCounter", 3)
 
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
     })
 
-  //     // mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-  //     //   asteroidArray.forEach((asteroid) => asteroid.attr("cx", velocityX + parseFloat(asteroid.attr("cx")))
-  //     //     .attr("cy", velocityY + parseFloat(asteroid.attr("cy"))))
-  //     // })
+
+
+  function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
+    // add 2 new asteroid into the array
+    // if split counter is not greater than 3
+    if asteroid.attr("splitCounter") != 0 {
+      
+        let asteroid = new Elem(svg, "circle")
+          .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+          .attr("cx", asteroidX + 10)
+          .attr("cy", asteroidY + 10)
+          .attr("r", asteroidRadius = asteroidRadius - 10)
+          .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+
+        arrayOfAsteroids.push(asteroid)
+    }
+
+  }
 
   // removes bullets and asteroids when it collides
   mainAsteroidsObservable.map(({ bulletArray, asteroidArray }) => {
@@ -199,23 +221,27 @@ function asteroids() {
         checkCollision(parseFloat(asteroid.attr("cx")), parseFloat(bullet.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(bullet.attr("cy")), parseFloat(bullet.attr("r")), parseFloat(asteroid.attr("r")))
       ))
         .forEach((bullet) => {
+          // remove bullets here
           bullet.elem.remove()
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
 
           // create new asteroids here - split here
+          splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")))
           asteroid.elem.remove()
           arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
         })
     })
   }).subscribe(() => console.log)
 
+  /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
+  // mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
+  //   asteroidArray.forEach((asteroid) => 
+  //     asteroid.attr("cx", (directionX * velocityX) + parseFloat(asteroid.attr("cx")))
+  //     .attr("cy", (directionY * velocityY) + parseFloat(asteroid.attr("cy"))))
+  // })
 
-  //     // // LOGIC FOR ASTEROID MOVING RANDOMLY
-  //     // mainAsteroidObservable.subscribe(() => {
-  //     //   asteroid.attr("cx", directionX * velocityX + Number(asteroid.attr("cx")))  // the ball should go towards the left or the right
-  //     //   asteroid.attr("cy", directionY * velocityY + Number(asteroid.attr("cy"))) // the ball should go up or down
-  //     // })
-  //   }
+
+
 
 
 
@@ -227,18 +253,6 @@ function asteroids() {
   // // })
 
 
-
-
-
-  // // .subscribe(() => console.log)
-
-  // // /* Logic to make sure it removes offscreen bullets from array */
-  // // mainAsteroidsObservable.map(({ bulletArray }) => {
-  // //   return bulletArray
-  // // })
-  // //   .forEach((bullet) => bullet.filter((bull) => (Number(bull.attr("cx")) >= 600 && (Number(bull.attr("cy")) >= 600) && (Number(bull.attr("cy")) <= 0) && Number(bull.attr("cx")) <= 0)).removeItem(bullet, arrayOfBullets)
-  // //   )
-  // //   .subscribe(() => console.log(arrayOfBullets))
 
 
 

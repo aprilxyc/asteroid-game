@@ -311,6 +311,8 @@ function asteroids() {
    )
    .subscribe(() => console.log)
 
+
+
   // //  // going out of left screen
   //  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) <= -30)
   //  .map((asteroid) => asteroid.attr("cx", 650))
@@ -325,58 +327,29 @@ function asteroids() {
    
    
 
-
-  //  .forEach((asteroid) => (
-  //   asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
-  //   .map((wrappedAsteroid) => wrappedAsteroid.attr("cx", 0))
-  //  ))
-  //  .subscribe((e) => console.log(e))
-   
-  
-
-    // asteroidWrappingState
-    //   .filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
-    //   .subscribe((asteroid) => {
-    //     console.log(asteroid)
-    //   })
-
-
-  //   asteroidWrappingState.forEach((asteroid) => asteroid.filter(({asteroid}) => (
-  //    (parseFloat(asteroid.attr("cx")) <= 0)
-  //  )).subscribe(() => {
-  //    asteroid.attr("cx", 600)
-  //  }))
-
-  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter(({asteroid}) => (
-  //   (parseFloat(asteroid.attr("cy")) >= 600)
-  // )).subscribe(() => {
-  //   asteroid.attr("cx", 0)
-  // }))
-
-  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter(({asteroid}) => (
-  //    (parseFloat(asteroid.attr("cx")) <= 0)
-  //  )).subscribe(() => {
-  //    asteroid.attr("cx", 600)
-  //  }))
-
-
+  let polygonTag = document.querySelector("polygon"),
+      polygonBBox = polygonTag.getBBox() // get the width or height
 
 
   
   /* Logic for person colliding with asteroid */
   //TODO FIX THIS
-  // mainAsteroidsObservable.map(({ asteroidArray }) => {
-  // asteroidArray.filter((asteroid) => (
-  //   checkCollision(parseFloat(g.attr("cx")), parseFloat(asteroid.attr("cx")), parseFloat(g.attr("cy")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(g.elem.transform.baseVal.length))
-  // )).subscribe((asteroid) => (
-  //  console.log("collided")
-  // ))}
-  // )
-
-  
-
+  mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
+  asteroidArray.filter((asteroid) => (
+    checkCollision( parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))
+  )).subscribe((asteroid) => (
+   console.log("hello")
+  ))
+  })
 
 }
+
+  // svgWidth = svg.width.baseVal.value
+
+  
+//ownerSVGElement, baseVal
+// ownerSVGElement, baseval, , viewportElement, clientHeight
+
 
 
 

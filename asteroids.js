@@ -181,6 +181,10 @@ function asteroids() {
     asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 650)
         .map((asteroid) => asteroid.attr("cy", -50)))
         .subscribe(() => console.log);
+    let polygonTag = document.querySelector("polygon"), polygonBBox = polygonTag.getBBox();
+    mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
+        asteroidArray.filter((asteroid) => (checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height)))).subscribe((asteroid) => (console.log("hello")));
+    });
 }
 if (typeof window != 'undefined')
     window.onload = () => {

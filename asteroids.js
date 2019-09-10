@@ -178,6 +178,9 @@ function asteroids() {
     asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 650)
         .map((asteroid) => asteroid.attr("cx", -50)))
         .subscribe(() => console.log);
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 650)
+        .map((asteroid) => asteroid.attr("cy", -50)))
+        .subscribe(() => console.log);
 }
 if (typeof window != 'undefined')
     window.onload = () => {

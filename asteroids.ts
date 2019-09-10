@@ -299,10 +299,29 @@ function asteroids() {
      return asteroidArray // get the array itself
    })
 
+   // going out of right screen
    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 650)
    .map((asteroid) => asteroid.attr("cx", -50))
    )
    .subscribe(() => console.log)
+
+   // going out of top screen
+   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 650)
+   .map((asteroid) => asteroid.attr("cy", -50))
+   )
+   .subscribe(() => console.log)
+
+  // //  // going out of left screen
+  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) <= -30)
+  //  .map((asteroid) => asteroid.attr("cx", 650))
+  //  )
+  //  .subscribe(() => console.log)
+
+  //  // going out of bottom screen
+  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= -50)
+  //  .map((asteroid) => asteroid.attr("cx", 650))
+  //  )
+  //  .subscribe(() => console.log)
    
    
 

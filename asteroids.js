@@ -102,15 +102,13 @@ function asteroids() {
         return Math.floor((Math.random() + min) * Math.floor(max));
     }
     function getDirection() {
-        return getRandomInt(0, 2) === 0 ? -2 : 2;
+        return getRandomInt(0, 2) === 0 ? -1 : 1;
     }
     let x_velocity = getRandomInt(1, 8);
     let y_velocity = getRandomInt(1, 8);
-    let directionX = Math.random();
-    let directionY = Math.random();
     mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-        asteroidArray.forEach((asteroid) => asteroid.attr("cx", (Math.random()) + parseFloat(asteroid.attr("cx")))
-            .attr("cy", (Math.random()) + parseFloat(asteroid.attr("cy"))));
+        asteroidArray.forEach((asteroid) => asteroid.attr("cx", (Math.random() * directionX) + parseFloat(asteroid.attr("cx")))
+            .attr("cy", (Math.random() * directionY) + parseFloat(asteroid.attr("cy"))));
     });
     mainAsteroidsObservable.
         takeUntil(asteroidObservable.filter(i => i == 7))
@@ -127,13 +125,20 @@ function asteroids() {
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {
-            let asteroid = new Elem(svg, "circle")
+            let asteroid1 = new Elem(svg, "circle")
+                .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+                .attr("cx", asteroidX - 10)
+                .attr("cy", asteroidY - 10)
+                .attr("r", asteroidRadius = asteroidRadius - 20)
+                .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
+            arrayOfAsteroids.push(asteroid1);
+            let asteroid2 = new Elem(svg, "circle")
                 .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
                 .attr("cx", asteroidX + 10)
                 .attr("cy", asteroidY + 10)
                 .attr("r", asteroidRadius = asteroidRadius - 20)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
-            arrayOfAsteroids.push(asteroid);
+            arrayOfAsteroids.push(asteroid2);
         }
     }
     mainAsteroidsObservable.map(({ bulletArray, asteroidArray }) => {

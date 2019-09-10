@@ -17,6 +17,13 @@ function asteroids() {
   //REMINDER TO ASK ABOUT HOW TO DO RANDOM MMOVEMENT
   // REMINDER TO TALK ASK ABOUT HOW TO SPLIT IT PROPERL IN A FUNCTIONAL WAY
 
+  // make levels and if you get to certain amount of points, the background will change
+  // you win when you hit a certain amount of points
+
+  // have a random booster that that shows up every 10 seconds -> gives you more points
+
+  // powerups where all the asteroids disappear from the screen 
+
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
   const          arrayOfAsteroids: Elem[] = [],   // array of bullets
@@ -174,20 +181,19 @@ function asteroids() {
   }
 
   function getDirection() {
-    return getRandomInt(0, 2) === 0? -2 : 2; 
+    return getRandomInt(0, 2) === 0? -1: 1; 
 }
 
   let x_velocity = getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
   let y_velocity = getRandomInt(1,8); // same here
-  let directionX = Math.random()
-  let directionY = Math.random()
+
 
 
    /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
   mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
     asteroidArray.forEach((asteroid) => 
-      asteroid.attr("cx", (Math.random()) + parseFloat(asteroid.attr("cx")))
-      .attr("cy", (Math.random()) + parseFloat(asteroid.attr("cy")))
+      asteroid.attr("cx", (Math.random() * directionX) + parseFloat(asteroid.attr("cx")))
+      .attr("cy", (Math.random() * directionY) + parseFloat(asteroid.attr("cy")))
       )
   })
 
@@ -216,14 +222,23 @@ function asteroids() {
     // add 2 new asteroid into the array
     // if split counter is not greater than 3
     if (asteroid.attr("splitCounter") != 0) {
-        let asteroid = new Elem(svg, "circle")
+        let asteroid1 = new Elem(svg, "circle")
+          .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+          .attr("cx", asteroidX -10)
+          .attr("cy", asteroidY -10)
+          .attr("r", asteroidRadius = asteroidRadius - 20)
+          .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+        
+        arrayOfAsteroids.push(asteroid1)
+
+        let asteroid2 = new Elem(svg, "circle")
           .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
           .attr("cx", asteroidX + 10)
           .attr("cy", asteroidY + 10)
           .attr("r", asteroidRadius = asteroidRadius - 20)
           .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
 
-        arrayOfAsteroids.push(asteroid)
+          arrayOfAsteroids.push(asteroid2)
     }
   }
 
@@ -320,8 +335,6 @@ function asteroids() {
    )
    .subscribe(() => console.log)
 
-
-
   // //  // going out of left screen
   //  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) <= -30)
   //  .map((asteroid) => asteroid.attr("cx", 650))
@@ -333,13 +346,10 @@ function asteroids() {
   //  .map((asteroid) => asteroid.attr("cx", 650))
   //  )
   //  .subscribe(() => console.log)
-   
-   
+  
 
   let polygonTag = document.querySelector("polygon"),
       polygonBBox = polygonTag.getBBox() // get the width or height
-
-
   
   /* Logic for person colliding with asteroid */
   //TODO FIX THIS

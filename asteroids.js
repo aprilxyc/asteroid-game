@@ -139,15 +139,15 @@ function asteroids() {
             });
         });
     }).subscribe(() => console.log);
-    mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-        asteroidArray.forEach((asteroid) => asteroid.attr("cx", (Math.random() * directionX) + parseFloat(asteroid.attr("cx")))
-            .attr("cy", (Math.random() * directionY) + parseFloat(asteroid.attr("cy"))));
-    });
-    mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY }) => ({
+    mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
         shipTransformX,
         shipTransformY,
         ship
-    })).subscribe((e) => console.log(e));
+    })).filter(({ shipTransformX, ship }) => (shipTransformX >= 600))
+        .subscribe(() => {
+        let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
+        g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`);
+    });
 }
 if (typeof window != 'undefined')
     window.onload = () => {

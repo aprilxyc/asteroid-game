@@ -199,8 +199,7 @@ function asteroids() {
   function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
     // add 2 new asteroid into the array
     // if split counter is not greater than 3
-    if asteroid.attr("splitCounter") != 0 {
-      
+    if (asteroid.attr("splitCounter") != 0) {
         let asteroid = new Elem(svg, "circle")
           .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
           .attr("cx", asteroidX + 10)
@@ -210,7 +209,6 @@ function asteroids() {
 
         arrayOfAsteroids.push(asteroid)
     }
-
   }
 
   // removes bullets and asteroids when it collides
@@ -234,23 +232,30 @@ function asteroids() {
   }).subscribe(() => console.log)
 
   /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
-  mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-    asteroidArray.forEach((asteroid) => 
-      asteroid.attr("cx", (Math.random() * directionX ) + parseFloat(asteroid.attr("cx")))
-      .attr("cy", (Math.random() * directionY) +parseFloat(asteroid.attr("cy")))
-      )
-  })
+  // mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
+  //   asteroidArray.forEach((asteroid) => 
+  //     asteroid.attr("cx", (Math.random() * directionX ) + parseFloat(asteroid.attr("cx")))
+  //     .attr("cy", (Math.random() * directionY) +parseFloat(asteroid.attr("cy")))
+  //     )
+  // })
 
   /* Constantly checking for screen wraps */
-  mainAsteroidsObservable.map(({ship, shipTransformX, shipTransformY}) => ({
+  mainAsteroidsObservable.map(({ship, shipTransformX, shipTransformY, shipRotation}) => ({
     shipTransformX,
     shipTransformY,
     ship
-  })).subscribe((e) => console.log(e))
-  
+  })).filter(({shipTransformX, ship}) => (shipTransformX >= 600))
+  .subscribe(() => {
+    let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+        transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+        shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
+    
+    g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`)
+  }
+    
+)
 
 }
-
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')

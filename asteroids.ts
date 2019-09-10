@@ -201,6 +201,8 @@ function asteroids() {
         .forEach((bullet) => {
           bullet.elem.remove()
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
+
+          // create new asteroids here - split here
           asteroid.elem.remove()
           arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
         })

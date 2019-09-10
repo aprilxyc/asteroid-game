@@ -347,15 +347,12 @@ function asteroids() {
       shipTransformY: shipTransformY
     })}).forEach(({asteroidArray, shipTransformX, shipTransformY}) => asteroidArray.filter((asteroid) => 
       checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))
-    ).map((e) => console.log(e))
+    ).map((e) => (
+      gameComplete = true
+    ))
     )
   .subscribe(() => console.log)
   
-  // .forEach((asteroidArray) => asteroid.filter((asteroid) => 
-  //   checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.height))
-  // ).map((e) => console.log(e))
-  // ).subscribe((e) => console.log)
-
 }
 
   // svgWidth = svg.width.baseVal.value

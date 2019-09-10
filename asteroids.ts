@@ -153,6 +153,7 @@ function asteroids() {
   function checkCollision(x1: number, x2: number, y1: number, y2: number, radius1: number, radius2: number) {
     let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))),
         sumOfRadii     = (radius1 + radius2)
+    console.log(lineOfDistance <= sumOfRadii)
     return lineOfDistance <= sumOfRadii
   }
 
@@ -164,18 +165,26 @@ function asteroids() {
   }
 
   function getDirection() {
-    return getRandomInt(0, 2) === 0? -1 : 1; 
+    return getRandomInt(0, 2) === 0? -2 : 2; 
 }
 
   let x_velocity = getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
   let y_velocity = getRandomInt(1,8); // same here
-  let directionX = getDirection()
-  let directionY = getDirection()
+  let directionX = Math.random()
+  let directionY = Math.random()
 
+
+   /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
+  mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
+    asteroidArray.forEach((asteroid) => 
+      asteroid.attr("cx", (Math.random()) + parseFloat(asteroid.attr("cx")))
+      .attr("cy", (Math.random()) + parseFloat(asteroid.attr("cy")))
+      )
+  })
 
   //     /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
   mainAsteroidsObservable.
-    takeUntil(asteroidObservable.filter(i => i == 5)) // this part taken from Harsil's code
+    takeUntil(asteroidObservable.filter(i => i == 7)) // this part taken from Harsil's code
     .subscribe((e) => {
       // create random starting points
       let asteroidRandomX = getRandomInt(0, 600)
@@ -188,8 +197,6 @@ function asteroids() {
         .attr("cy", asteroidRandomY)
         .attr("r", 50)
         .attr("splitCounter", 3)
-
-      console.log(asteroid)
 
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
@@ -204,7 +211,7 @@ function asteroids() {
           .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
           .attr("cx", asteroidX + 10)
           .attr("cy", asteroidY + 10)
-          .attr("r", asteroidRadius = asteroidRadius - 10)
+          .attr("r", asteroidRadius = asteroidRadius - 20)
           .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
 
         arrayOfAsteroids.push(asteroid)
@@ -232,26 +239,19 @@ function asteroids() {
     })
   }).subscribe(() => console.log)
 
-  /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
-  // mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-  //   asteroidArray.forEach((asteroid) => 
-  //     asteroid.attr("cx", (Math.random() * directionX ) + parseFloat(asteroid.attr("cx")))
-  //     .attr("cy", (Math.random() * directionY) +parseFloat(asteroid.attr("cy")))
-  //     )
-  // })
-
   /* Constantly checking for screen wraps */
 
-  let asteroidWrappingState = 
+  let shipWrappingState
+   = 
   mainAsteroidsObservable.map(({ship, shipTransformX, shipTransformY, shipRotation}) => ({
     shipTransformX,
     shipTransformY,
     ship
   }))
 
-
   // If ship goes out of right hand side of the screen
-  asteroidWrappingState.filter(({shipTransformX, ship}) => (shipTransformX >= 600))
+  shipWrappingState
+  .filter(({shipTransformX, ship}) => (shipTransformX >= 600))
   .subscribe(() => {
     let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
         transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -261,7 +261,8 @@ function asteroids() {
   })
 
     // If ship goes out of left hand side of the screen
-    asteroidWrappingState.filter(({shipTransformX, ship}) => (shipTransformX <= 0))
+    shipWrappingState
+    .filter(({shipTransformX, ship}) => (shipTransformX <= 0))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -271,7 +272,8 @@ function asteroids() {
     })
 
     // if ship leaves top of screen
-    asteroidWrappingState.filter(({shipTransformY, ship}) => (shipTransformY >= 600))
+    shipWrappingState
+    .filter(({shipTransformY, ship}) => (shipTransformY >= 600))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -281,7 +283,8 @@ function asteroids() {
     })
 
     // if ship leaves bottom of screen
-  asteroidWrappingState.filter(({shipTransformY, ship}) => (shipTransformY <= 0))
+  shipWrappingState
+  .filter(({shipTransformY, ship}) => (shipTransformY <= 0))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -289,10 +292,76 @@ function asteroids() {
       
       g.attr("transform", `translate(${transformX} ${transformY = 600}) rotate(${shipRotation})`)
     })
+
+    // save the asteroid wrapping as a state
+    let asteroidWrappingState = 
+   mainAsteroidsObservable.map(({asteroidArray}) => {
+     return asteroidArray // get the array itself
+   })
+
+   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 650)
+   .map((asteroid) => asteroid.attr("cx", -50))
+   )
+   .subscribe(() => console.log)
+   
+   
+
+
+  //  .forEach((asteroid) => (
+  //   asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
+  //   .map((wrappedAsteroid) => wrappedAsteroid.attr("cx", 0))
+  //  ))
+  //  .subscribe((e) => console.log(e))
+   
+  
+
+    // asteroidWrappingState
+    //   .filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
+    //   .subscribe((asteroid) => {
+    //     console.log(asteroid)
+    //   })
+
+
+  //   asteroidWrappingState.forEach((asteroid) => asteroid.filter(({asteroid}) => (
+  //    (parseFloat(asteroid.attr("cx")) <= 0)
+  //  )).subscribe(() => {
+  //    asteroid.attr("cx", 600)
+  //  }))
+
+  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter(({asteroid}) => (
+  //   (parseFloat(asteroid.attr("cy")) >= 600)
+  // )).subscribe(() => {
+  //   asteroid.attr("cx", 0)
+  // }))
+
+  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter(({asteroid}) => (
+  //    (parseFloat(asteroid.attr("cx")) <= 0)
+  //  )).subscribe(() => {
+  //    asteroid.attr("cx", 600)
+  //  }))
+
+
+
+
   
   /* Logic for person colliding with asteroid */
+  //TODO FIX THIS
+  // mainAsteroidsObservable.map(({ asteroidArray }) => {
+  // asteroidArray.filter((asteroid) => (
+  //   checkCollision(parseFloat(g.attr("cx")), parseFloat(asteroid.attr("cx")), parseFloat(g.attr("cy")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(g.elem.transform.baseVal.length))
+  // )).subscribe((asteroid) => (
+  //  console.log("collided")
+  // ))}
+  // )
+
+  
+
 
 }
+
+
+
+
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')

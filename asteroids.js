@@ -90,20 +90,25 @@ function asteroids() {
     });
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
+        console.log(lineOfDistance <= sumOfRadii);
         return lineOfDistance <= sumOfRadii;
     }
     function getRandomInt(min, max) {
         return Math.floor((Math.random() + min) * Math.floor(max));
     }
     function getDirection() {
-        return getRandomInt(0, 2) === 0 ? -1 : 1;
+        return getRandomInt(0, 2) === 0 ? -2 : 2;
     }
     let x_velocity = getRandomInt(1, 8);
     let y_velocity = getRandomInt(1, 8);
-    let directionX = getDirection();
-    let directionY = getDirection();
+    let directionX = Math.random();
+    let directionY = Math.random();
+    mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
+        asteroidArray.forEach((asteroid) => asteroid.attr("cx", (Math.random()) + parseFloat(asteroid.attr("cx")))
+            .attr("cy", (Math.random()) + parseFloat(asteroid.attr("cy"))));
+    });
     mainAsteroidsObservable.
-        takeUntil(asteroidObservable.filter(i => i == 5))
+        takeUntil(asteroidObservable.filter(i => i == 7))
         .subscribe((e) => {
         let asteroidRandomX = getRandomInt(0, 600);
         let asteroidRandomY = getRandomInt(0, 600);
@@ -113,7 +118,6 @@ function asteroids() {
             .attr("cy", asteroidRandomY)
             .attr("r", 50)
             .attr("splitCounter", 3);
-        console.log(asteroid);
         arrayOfAsteroids.push(asteroid);
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
@@ -122,7 +126,7 @@ function asteroids() {
                 .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
                 .attr("cx", asteroidX + 10)
                 .attr("cy", asteroidY + 10)
-                .attr("r", asteroidRadius = asteroidRadius - 10)
+                .attr("r", asteroidRadius = asteroidRadius - 20)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
             arrayOfAsteroids.push(asteroid);
         }
@@ -139,31 +143,41 @@ function asteroids() {
             });
         });
     }).subscribe(() => console.log);
-    let asteroidWrappingState = mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
+    let shipWrappingState = mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
         shipTransformX,
         shipTransformY,
         ship
     }));
-    asteroidWrappingState.filter(({ shipTransformX, ship }) => (shipTransformX >= 600))
+    shipWrappingState
+        .filter(({ shipTransformX, ship }) => (shipTransformX >= 600))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`);
     });
-    asteroidWrappingState.filter(({ shipTransformX, ship }) => (shipTransformX <= 0))
+    shipWrappingState
+        .filter(({ shipTransformX, ship }) => (shipTransformX <= 0))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX = 600} ${transformY}) rotate(${shipRotation})`);
     });
-    asteroidWrappingState.filter(({ shipTransformY, ship }) => (shipTransformY >= 600))
+    shipWrappingState
+        .filter(({ shipTransformY, ship }) => (shipTransformY >= 600))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY = 0}) rotate(${shipRotation})`);
     });
-    asteroidWrappingState.filter(({ shipTransformY, ship }) => (shipTransformY <= 0))
+    shipWrappingState
+        .filter(({ shipTransformY, ship }) => (shipTransformY <= 0))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY = 600}) rotate(${shipRotation})`);
     });
+    let asteroidWrappingState = mainAsteroidsObservable.map(({ asteroidArray }) => {
+        return asteroidArray;
+    });
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 650)
+        .map((asteroid) => asteroid.attr("cx", -50)))
+        .subscribe(() => console.log);
 }
 if (typeof window != 'undefined')
     window.onload = () => {

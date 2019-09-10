@@ -8,6 +8,7 @@ function asteroids() {
         .takeUntil(mainTimer.filter(_ => gameComplete == true)).map(_ => ({
         bulletArray: arrayOfBullets,
         asteroidArray: arrayOfAsteroids,
+        ship: g,
         shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
         shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
         shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle)
@@ -89,7 +90,6 @@ function asteroids() {
     });
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
-        console.log(lineOfDistance <= sumOfRadii);
         return lineOfDistance <= sumOfRadii;
     }
     function getRandomInt(min, max) {
@@ -103,7 +103,7 @@ function asteroids() {
     let directionX = getDirection();
     let directionY = getDirection();
     mainAsteroidsObservable.
-        takeUntil(asteroidObservable.filter(i => i == 10))
+        takeUntil(asteroidObservable.filter(i => i == 5))
         .subscribe((e) => {
         let asteroidRandomX = getRandomInt(0, 600);
         let asteroidRandomY = getRandomInt(0, 600);
@@ -140,9 +140,14 @@ function asteroids() {
         });
     }).subscribe(() => console.log);
     mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-        asteroidArray.forEach((asteroid) => asteroid.attr("cx", Math.random() * getDirection() + parseFloat(asteroid.attr("cx")))
-            .attr("cy", Math.random() * getDirection() + parseFloat(asteroid.attr("cy"))));
+        asteroidArray.forEach((asteroid) => asteroid.attr("cx", (Math.random() * directionX) + parseFloat(asteroid.attr("cx")))
+            .attr("cy", (Math.random() * directionY) + parseFloat(asteroid.attr("cy"))));
     });
+    mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY }) => ({
+        shipTransformX,
+        shipTransformY,
+        ship
+    })).subscribe((e) => console.log(e));
 }
 if (typeof window != 'undefined')
     window.onload = () => {

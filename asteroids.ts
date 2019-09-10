@@ -31,6 +31,7 @@ function asteroids() {
     ).map(_ => ({
       bulletArray   : arrayOfBullets,
       asteroidArray : arrayOfAsteroids,
+      ship: g,
       shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
       shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
       shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle)
@@ -152,7 +153,6 @@ function asteroids() {
   function checkCollision(x1: number, x2: number, y1: number, y2: number, radius1: number, radius2: number) {
     let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))),
         sumOfRadii     = (radius1 + radius2)
-    console.log(lineOfDistance <= sumOfRadii)
     return lineOfDistance <= sumOfRadii
   }
 
@@ -175,7 +175,7 @@ function asteroids() {
 
   //     /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
   mainAsteroidsObservable.
-    takeUntil(asteroidObservable.filter(i => i == 10)) // this part taken from Harsil's code
+    takeUntil(asteroidObservable.filter(i => i == 5)) // this part taken from Harsil's code
     .subscribe((e) => {
       // create random starting points
       let asteroidRandomX = getRandomInt(0, 600)
@@ -194,7 +194,6 @@ function asteroids() {
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
     })
-
 
 
   function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
@@ -237,24 +236,18 @@ function asteroids() {
   /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
   mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
     asteroidArray.forEach((asteroid) => 
-      asteroid.attr("cx", Math.random() * getDirection() + parseFloat(asteroid.attr("cx")))
-      .attr("cy", Math.random() * getDirection() + parseFloat(asteroid.attr("cy")))
+      asteroid.attr("cx", (Math.random() * directionX ) + parseFloat(asteroid.attr("cx")))
+      .attr("cy", (Math.random() * directionY) +parseFloat(asteroid.attr("cy")))
       )
   })
 
-
-
-
-
-  // // // LOGIC FOR ASTEROID MOVING RANDOMLY
-  // mainAsteroidObservable.subscribe(() => {
-  //   asteroid.attr("cx", directionX * velocityX + Number(asteroid.attr("cx")))  // the ball should go towards the left or the right
-  //   asteroid.attr("cy", directionY * velocityY + Number(asteroid.attr("cy"))) // the ball should go up or down
-  // })
-
-
-
-
+  /* Constantly checking for screen wraps */
+  mainAsteroidsObservable.map(({ship, shipTransformX, shipTransformY}) => ({
+    shipTransformX,
+    shipTransformY,
+    ship
+  })).subscribe((e) => console.log(e))
+  
 
 }
 

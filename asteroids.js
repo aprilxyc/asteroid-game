@@ -18,7 +18,7 @@ function asteroids() {
         .attr("transform", "translate(300 300) rotate(170)");
     const ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 15,20 0,-20")
-        .attr("style", "fill:lime;stroke:purple;stroke-width:1");
+        .attr("style", "fill:#f4e46c;stroke:#d3f08d;stroke-width:2");
     const keydown$ = Observable.fromEvent(document, 'keydown');
     const keyup$ = Observable.fromEvent(document, 'keyup');
     keydown$.map(({ key }) => {

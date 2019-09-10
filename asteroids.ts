@@ -13,7 +13,10 @@ function asteroids() {
   // Explain which ideas you have used ideas from the lectures to 
   // create reusable, generic functions.
 
-  //REMINDER CHANGE EVERYTHING TO TODO
+  //REMINDER CHANGE EVERYTHING TO CONST
+  //REMINDER TO ASK ABOUT HOW TO DO RANDOM MMOVEMENT
+  // REMINDER TO TALK ASK ABOUT HOW TO SPLIT IT PROPERL IN A FUNCTIONAL WAY
+
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
   const          arrayOfAsteroids: Elem[] = [],   // array of bullets
@@ -47,7 +50,7 @@ function asteroids() {
   // create a polygon shape for the space ship as a child of the transform group 
   const ship = new Elem(svg, 'polygon', g.elem)
     .attr("points", "-15,20 15,20 0,-20")
-    .attr("style", "fill:lime;stroke:purple;stroke-width:1")
+    .attr("style", "fill:#f4e46c;stroke:#d3f08d;stroke-width:2")
 
   // creates new observable that emits an event object everytime a keydown is fired
   // emits keyboard event everytime user presses down a key
@@ -350,6 +353,7 @@ function asteroids() {
     ).map((e) => {
       gameComplete = true;
       ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
+      // add function here to show game over
     })
     )
   .subscribe(() => console.log)

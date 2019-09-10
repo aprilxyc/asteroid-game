@@ -211,6 +211,7 @@ function asteroids() {
     }
   }
 
+  /* Logic for bullet and asteroid collision */
   // removes bullets and asteroids when it collides
   mainAsteroidsObservable.map(({ bulletArray, asteroidArray }) => {
     // go through the asteroids
@@ -240,20 +241,56 @@ function asteroids() {
   // })
 
   /* Constantly checking for screen wraps */
+
+  let asteroidWrappingState = 
   mainAsteroidsObservable.map(({ship, shipTransformX, shipTransformY, shipRotation}) => ({
     shipTransformX,
     shipTransformY,
     ship
-  })).filter(({shipTransformX, ship}) => (shipTransformX >= 600))
+  }))
+
+
+  // If ship goes out of right hand side of the screen
+  asteroidWrappingState.filter(({shipTransformX, ship}) => (shipTransformX >= 600))
   .subscribe(() => {
     let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
         transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
         shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
     
     g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`)
-  }
-    
-)
+  })
+
+    // If ship goes out of left hand side of the screen
+    asteroidWrappingState.filter(({shipTransformX, ship}) => (shipTransformX <= 0))
+    .subscribe(() => {
+      let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+          transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+          shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
+      
+      g.attr("transform", `translate(${transformX = 600} ${transformY}) rotate(${shipRotation})`)
+    })
+
+    // if ship leaves top of screen
+    asteroidWrappingState.filter(({shipTransformY, ship}) => (shipTransformY >= 600))
+    .subscribe(() => {
+      let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+          transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+          shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
+      
+      g.attr("transform", `translate(${transformX} ${transformY = 0}) rotate(${shipRotation})`)
+    })
+
+    // if ship leaves bottom of screen
+  asteroidWrappingState.filter(({shipTransformY, ship}) => (shipTransformY <= 0))
+    .subscribe(() => {
+      let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+          transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+          shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
+      
+      g.attr("transform", `translate(${transformX} ${transformY = 600}) rotate(${shipRotation})`)
+    })
+  
+  /* Logic for person colliding with asteroid */
 
 }
 

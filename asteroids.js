@@ -1,6 +1,6 @@
 "use strict";
 function asteroids() {
-    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, powerUp = 3, asteroidRespawn = false;
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, powerUp = 3;
     let gameComplete = false;
     const mainTimer = Observable.interval(5);
     const asteroidObservable = Observable.interval(1);
@@ -106,8 +106,8 @@ function asteroids() {
                 .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy")));
         });
     });
-    mainAsteroidsObservable.
-        takeUntil(asteroidObservable.filter(i => i == 8))
+    mainAsteroidsObservable
+        .takeUntil(asteroidObservable.filter(i => i == 8))
         .subscribe((e) => {
         let asteroidRandomX = getRandomInt(0, 600);
         let asteroidRandomY = getRandomInt(0, 600);
@@ -206,12 +206,11 @@ function asteroids() {
             shipTransformY: shipTransformY
         });
     }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) => checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))).map((e) => {
-        lives -= 1;
-        updateLives(lives);
+        updateLives();
+        ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
         return lives;
     }).filter((lives) => lives == 0).map(() => {
         gameComplete = true;
-        ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     })).subscribe(() => console.log);
     keydown$.map(({ keyCode }) => {
         return ({
@@ -227,19 +226,19 @@ function asteroids() {
         return (arrayOfAsteroids.forEach((asteroid) => {
             arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
             asteroid.elem.remove();
-            console.log(arrayOfAsteroids);
         }));
     }).subscribe(() => {
-        powerUp -= 1;
-        updateBombPowerup(powerUp);
+        updateBombPowerup();
     });
     function updateScore(score) {
         document.getElementById("score").innerHTML = "Score: " + score;
     }
-    function updateLives(lives) {
+    function updateLives() {
+        lives = lives - 1;
         document.getElementById("lives").innerHTML = "Lives: " + lives;
     }
-    function updateBombPowerup(powerup) {
+    function updateBombPowerup() {
+        powerup = powerup - 1;
         document.getElementById("bomb").innerHTML = "Bombs: " + powerUp;
     }
 }

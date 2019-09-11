@@ -29,12 +29,11 @@ function asteroids() {
 
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
-  let            arrayOfAsteroids: Elem[] = [],    // array of bullets
+  let            arrayOfAsteroids: Elem[] = [],   // array of bullets
   arrayOfBullets: Elem[]                  = [],
                  myScore                  = 0,
                  lives                    = 3,
-                 powerUp                  = 3,
-                 asteroidRespawn          = false
+                 powerUp                  = 3
 
   let gameComplete = false
 
@@ -198,8 +197,8 @@ function asteroids() {
   })
 
   /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
-  mainAsteroidsObservable.
-    takeUntil(asteroidObservable.filter(i => i == 8)) // this part taken from Harsil's code
+ mainAsteroidsObservable
+    .takeUntil(asteroidObservable.filter(i => i == 8)) // this part taken from Harsil's code
     .subscribe((e) => {
       // create random starting points
       let asteroidRandomX = getRandomInt(0, 600)
@@ -214,11 +213,9 @@ function asteroids() {
         .attr("splitCounter", 3)
         .attr("directionX", getRandomInt(-1, 1))
         .attr("directionY", getRandomInt(-1, 1))
-
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
     })
-
 
   function splitAsteroid(asteroid, asteroidX: number, asteroidY: number, asteroidRadius: number, asteroidSplitCounter: number) {
 
@@ -370,28 +367,16 @@ function asteroids() {
   }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) =>
     checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))
   ).map((e) => {
-    lives -= 1
-    updateLives(lives)
+    updateLives()
+    ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1"); // make this a shortterm observable
     return lives
   }).filter((lives) => lives == 0).map(() => {
     gameComplete = true;
-    ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
+
     // add function here to show game over
   })
   ).subscribe(() => console.log)
 
-  /* LOGIC FOR POWERUP */
-  // keydown$.map(({ keyCode }) => {
-  //   return ({
-  //     keyCode,
-  //     spaceship    : g,
-  //     asteroidArray: arrayOfAsteroids
-  //   })
-  // }).filter(({ keyCode, asteroidArray}) => (keyCode == 80))
-  //   .flatMap(({keyCode, asteroidArray}) => {
-  //     let timer = Observable.interval(200)
-  //     timer.takeUntil(keyup$)
-  //   }).subscribe(({asteroidArray}) => console.log(asteroidArray))
 
 /*  LOGIC FOR USING BOMB POWERUP */
   keydown$.map(({ keyCode }) => {
@@ -413,24 +398,26 @@ function asteroids() {
         arrayOfAsteroids.forEach((asteroid) => {
           arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
           asteroid.elem.remove()
-          console.log(arrayOfAsteroids)
         })
       )}).subscribe(() => {
-        powerUp -= 1
-        updateBombPowerup(powerUp)
+        updateBombPowerup()
       })
+
+  
 
   // impure function to update the score
   function updateScore(score: number) {
     document.getElementById("score")!.innerHTML = "Score: " + score
   }
 
-  function updateLives(lives: number) {
-    document.getElementById("lives")!.innerHTML = "Lives: " + lives
+  function updateLives() {
+                                                                                                                            lives               = lives - 1
+                                                                                                    document.getElementById("lives")!.innerHTML = "Lives: " + lives
   }
 
-  function updateBombPowerup(powerup: number) {
-    document.getElementById("bomb")!.innerHTML = "Bombs: " + powerUp
+  function updateBombPowerup() {
+                                                                                                                            powerup            = powerup - 1
+                                                                                                    document.getElementById("bomb")!.innerHTML = "Bombs: " + powerUp
   }
 
 }

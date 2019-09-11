@@ -17,7 +17,7 @@ function asteroids() {
     const g = new Elem(svg, 'g')
         .attr("transform", "translate(300 300) rotate(170)");
     const ship = new Elem(svg, 'polygon', g.elem)
-        .attr("points", "-15,20 15,20 0,-20")
+        .attr("points", "-15,20 7,20 0,-20")
         .attr("style", "fill:#f4e46c;stroke:#d3f08d;stroke-width:2");
     const keydown$ = Observable.fromEvent(document, 'keydown');
     const keyup$ = Observable.fromEvent(document, 'keyup');
@@ -190,8 +190,14 @@ function asteroids() {
     let asteroidWrappingState = mainAsteroidsObservable.map(({ asteroidArray }) => {
         return asteroidArray;
     });
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 600)
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
         .map((asteroid) => asteroid.attr("cx", 0))).subscribe(() => console.log);
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
+        .map((asteroid) => asteroid.attr("cy", 0))).subscribe(() => console.log);
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
+        .map((asteroid) => asteroid.attr("cx", 600))).subscribe(() => console.log);
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
+        .map((asteroid) => asteroid.attr("cy", 600))).subscribe(() => console.log);
     let polygonTag = document.querySelector("polygon"), polygonBBox = polygonTag.getBBox();
     mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
         return ({

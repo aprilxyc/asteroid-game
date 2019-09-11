@@ -59,7 +59,7 @@ function asteroids() {
 
   // create a polygon shape for the space ship as a child of the transform group 
   const ship = new Elem(svg, 'polygon', g.elem)
-    .attr("points", "-15,20 15,20 0,-20")
+    .attr("points", "-15,20 7,20 0,-20")
     .attr("style", "fill:#f4e46c;stroke:#d3f08d;stroke-width:2")
 
   // creates new observable that emits an event object everytime a keydown is fired
@@ -331,24 +331,24 @@ function asteroids() {
     })
 
   // going out of right screen
-  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 600)
+  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
     .map((asteroid) => asteroid.attr("cx", 0))
   ).subscribe(() => console.log)
 
   // // going out of top screen
-  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 600)
-  //   .map((asteroid) => asteroid.attr("cy", 0))
-  // ).subscribe(() => console.log)
+  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
+    .map((asteroid) => asteroid.attr("cy", 0))
+  ).subscribe(() => console.log)
 
   // // going out of left screen
-  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= 0)
-  //   .map((asteroid) => asteroid.attr("cx", 600))
-  // ).subscribe(() => console.log)
+  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
+    .map((asteroid) => asteroid.attr("cx", 600))
+  ).subscribe(() => console.log)
 
   // // going out of bottom screen
-  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= -50)
-  //   .map((asteroid) => asteroid.attr("cx", 650))
-  // ).subscribe(() => console.log)
+  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
+    .map((asteroid) => asteroid.attr("cy", 600))
+  ).subscribe(() => console.log)
 
 
   let polygonTag  = document.querySelector("polygon"),

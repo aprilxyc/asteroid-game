@@ -19,9 +19,10 @@ function asteroids() {
     const ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 0,15 15,20 0, -20")
         .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2");
-    const keydown$ = Observable.fromEvent(document, 'keydown').map(({ keyCode }) => ({
+    const keydown$ = Observable.fromEvent(document, 'keydown').map(({ keyCode, key }) => ({
         asteroidArray: arrayOfAsteroids,
-        keyCode
+        keyCode,
+        key
     }));
     const keyup$ = Observable.fromEvent(document, 'keyup');
     keydown$.map(({ key }) => {
@@ -215,21 +216,32 @@ function asteroids() {
     keydown$.map(({ keyCode }) => {
         return ({
             keyCode,
-            spaceship: g,
-            asteroidArray: arrayOfAsteroids
+            spaceship: g
         });
     }).filter(({ keyCode }) => (keyCode == 80))
-        .map(({ asteroidArray }) => {
-        return (asteroidArray.forEach((asteroid) => {
-            asteroidArray.splice(asteroidArray.indexOf(asteroid), 1);
+        .flatMap((keyCode) => (Observable.interval(15)
+        .takeUntil(keyup$)))
+        .map(() => {
+        return (arrayOfAsteroids);
+    }).map((arrayOfAsteroids) => {
+        return (arrayOfAsteroids.forEach((asteroid) => {
+            arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
             asteroid.elem.remove();
-            console.log(asteroidArray);
+            console.log(arrayOfAsteroids);
         }));
-    }).subscribe(() => console.log, function updateScore(score) {
-        document.getElementById("score").innerHTML = "Score: " + score;
-    }, function updateLives(lives) {
-        document.getElementById("lives").innerHTML = "Lives: " + lives;
+    }).subscribe(() => {
+        powerUp -= 1;
+        updateBombPowerup(powerUp);
     });
+    function updateScore(score) {
+        document.getElementById("score").innerHTML = "Score: " + score;
+    }
+    function updateLives(lives) {
+        document.getElementById("lives").innerHTML = "Lives: " + lives;
+    }
+    function updateBombPowerup(powerup) {
+        document.getElementById("bomb").innerHTML = "Bombs: " + powerUp;
+    }
 }
 if (typeof window != 'undefined')
     window.onload = () => {

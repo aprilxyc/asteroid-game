@@ -68,9 +68,10 @@ function asteroids() {
     .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2")
 
   // creates new observable that emits an event object everytime a keydown is fired
-  const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode}) => ({
+  const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode, key}) => ({
     asteroidArray: arrayOfAsteroids,
-    keyCode
+    keyCode,
+    key
   }));
   const keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
 
@@ -380,22 +381,45 @@ function asteroids() {
   ).subscribe(() => console.log)
 
   /* LOGIC FOR POWERUP */
+  // keydown$.map(({ keyCode }) => {
+  //   return ({
+  //     keyCode,
+  //     spaceship    : g,
+  //     asteroidArray: arrayOfAsteroids
+  //   })
+  // }).filter(({ keyCode, asteroidArray}) => (keyCode == 80))
+  //   .flatMap(({keyCode, asteroidArray}) => {
+  //     let timer = Observable.interval(200)
+  //     timer.takeUntil(keyup$)
+  //   }).subscribe(({asteroidArray}) => console.log(asteroidArray))
+
+/*  LOGIC FOR USING BOMB POWERUP */
   keydown$.map(({ keyCode }) => {
     return ({
       keyCode,
-      spaceship    : g,
-      asteroidArray: arrayOfAsteroids
+      spaceship: g
     })
   }).filter(({ keyCode }) => (keyCode == 80))
-    .map(({asteroidArray}) => {
+    .flatMap((keyCode) => (
+      Observable.interval(15)
+        .takeUntil(keyup$)
+    ))
+    .map(() => {
       return (
-        asteroidArray.forEach((asteroid) => {
-          asteroidArray.splice(asteroidArray.indexOf(asteroid), 1)
+        arrayOfAsteroids
+      )     
+    }).map((arrayOfAsteroids) => {
+      return (
+        arrayOfAsteroids.forEach((asteroid) => {
+          arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
           asteroid.elem.remove()
-          console.log(asteroidArray)
+          console.log(arrayOfAsteroids)
         })
-    )}).subscribe(() => console.log
-    
+      )}).subscribe(() => {
+        powerUp -= 1
+        updateBombPowerup(powerUp)
+      })
+
   // impure function to update the score
   function updateScore(score: number) {
     document.getElementById("score")!.innerHTML = "Score: " + score
@@ -403,6 +427,10 @@ function asteroids() {
 
   function updateLives(lives: number) {
     document.getElementById("lives")!.innerHTML = "Lives: " + lives
+  }
+
+  function updateBombPowerup(powerup: number) {
+    document.getElementById("bomb")!.innerHTML = "Bombs: " + powerUp
   }
 
 }

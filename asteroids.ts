@@ -29,8 +29,9 @@ function asteroids() {
 
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
-  const          arrayOfAsteroids: Elem[] = [],   // array of bullets
-  arrayOfBullets: Elem[]                  = []    // array of asteroiods
+  let            arrayOfAsteroids: Elem[] = [],   // array of bullets
+  arrayOfBullets: Elem[]                  = [],
+                 myScore                  = 0
 
   let gameComplete = false
 
@@ -47,7 +48,7 @@ function asteroids() {
       ship          : g,
       shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
       shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
-      shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle)
+      shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle),
     }))
 
   const svg = document.getElementById("canvas")!;
@@ -57,19 +58,17 @@ function asteroids() {
   const g = new Elem(svg, 'g')
     .attr("transform", "translate(300 300) rotate(170)")
 
-  // my points
-  // .attr("points", "-15,20 15,20 0, -20")
+
   // create a polygon shape for the space ship as a child of the transform group 
   const ship = new Elem(svg, 'polygon', g.elem)
     .attr("points", "-15,20 0,15 15,20 0, -20")
     .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2")
 
   // creates new observable that emits an event object everytime a keydown is fired
-  // emits keyboard event everytime user presses down a key
   const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown');
   const keyup$   = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
 
-  /* Logic for the key movement */
+  /* LOGIC FOR KEY MOVEMENT  */
 
   // moving ship to the right
   keydown$.map(({ key }) => {
@@ -100,13 +99,14 @@ function asteroids() {
       Observable.interval(15)
         .takeUntil(keyup$)
     ))
-    .subscribe(({ spaceship }) => {
+    .subscribe(({ ) => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
       g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation - 10})`)
     })
 
+  // moving ship forwards
   keydown$.map(({ key }) => {
     return ({
       key         : key,
@@ -127,7 +127,7 @@ function asteroids() {
       g.attr("transform", `translate(${transformX = transformX + x} ${transformY = transformY + y}) rotate(${shipRotation})`)
     })
 
-  /*  Logic for creating the bullets */
+  /*  LOGIC FOR CREATING THE BULLETS */
   keydown$
     .map(({ key }) => ({
       key,
@@ -135,8 +135,8 @@ function asteroids() {
       transformY  : Number(g.elem.transform.baseVal.getItem(0).matrix.f),
       shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle),
     }))
-    .filter(({ key, transformX, transformY, shipRotation }) => (key == " "))
-    .subscribe(({ key, transformX, transformY, shipRotation }) => {
+    .filter(({ key }) => (key == " "))
+    .subscribe(({ transformX, transformY, shipRotation }) => {
       const rotationRadians = shipRotation * (Math.PI / 180)
 
       // create bullets
@@ -153,7 +153,7 @@ function asteroids() {
 
     })
 
-  /* Logic for removing the bullets that are offscreen from the array */
+  /* LOGIC FOR REMOVING BULLETS THAT ARE OFFSCREEN FROM ARRAY */
   mainAsteroidsObservable.subscribe(({ bulletArray }) => {
     bulletArray.map((bullet) => bullet.attr("cx", parseFloat(bullet.attr("cx")) + parseFloat(bullet.attr("bulletDistanceX")))
       .attr("cy", parseFloat(bullet.attr("cy")) + parseFloat(bullet.attr("bulletDistanceY"))))
@@ -171,9 +171,10 @@ function asteroids() {
     return lineOfDistance <= sumOfRadii
   }
 
-  //     /* LOGIC FOR RANDOM ASTEROID MOVEMENT */
-  //     // used to get a random integer for asteroid random movementts
-  //     // inspired by: https://stackoverflow.com/questions/52015418/random-movement-angular
+  /* LOGIC FOR RANDOM ASTEROID MOVEMENT */
+
+  // used to get a random integer for asteroid random movements
+  // inspired by: https://stackoverflow.com/questions/52015418/random-movement-angular
   function getRandomInt(min: number, max: number) {
     return (Math.random() + min) * Math.floor(max);
   }
@@ -192,7 +193,7 @@ function asteroids() {
     )
   })
 
-  //     /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
+  /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
   mainAsteroidsObservable.
     takeUntil(asteroidObservable.filter(i => i == 7)) // this part taken from Harsil's code
     .subscribe((e) => {
@@ -216,11 +217,6 @@ function asteroids() {
 
 
   function splitAsteroid(asteroid, asteroidX: number, asteroidY: number, asteroidRadius: number, asteroidSplitCounter: number) {
-    console.log("asteriod: " + asteroid.attr("splitCounter"))
-    console.log("asteroidX: " + asteroidX)
-    console.log("asteroidY: " + asteroidY)
-    console.log("asteroidRadius: " + asteroidRadius)
-    console.log("splitcount: " + asteroidSplitCounter)
 
     // add 2 new asteroid into the array
     // if split counter is not greater than 3
@@ -250,8 +246,8 @@ function asteroids() {
     }
   }
 
-  /* Logic for bullet and asteroid collision */
-  // removes bullets and asteroids when it collides
+  /* LOGIC FOR BULLET AND ASTEROID COLLISIONS 
+  This removes bullets and asteroids when bullets collide with asteroids. */
   mainAsteroidsObservable.map(({ bulletArray, asteroidArray }) => {
     // go through the asteroids
     asteroidArray.forEach((asteroid) => {
@@ -263,6 +259,10 @@ function asteroids() {
           bullet.elem.remove()
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
 
+          // increase score by 10 for each collision
+          myScore += 10
+          updateScore(myScore)
+
           // create new asteroids here - split here
           splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")))
           // console.log("myasteroid array:" + arrayOfAsteroids)
@@ -272,19 +272,19 @@ function asteroids() {
     })
   }).subscribe(() => console.log)
 
-  /* Constantly checking for screen wraps */
+  /* LOGIC THAT CONSTANTLY CHECKS FOR SCREEN WRAPS */
 
-  let shipWrappingState
-     = 
-    mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
-      shipTransformX,
-      shipTransformY,
-      ship
-    }))
+  const shipWrappingState = mainAsteroidsObservable
+    .map(({ ship, shipTransformX, shipTransformY, shipRotation }) =>
+      ({
+        shipTransformX,
+        shipTransformY,
+        ship
+      }))
 
   // If ship goes out of right hand side of the screen
   shipWrappingState
-    .filter(({ shipTransformX, ship }) => (shipTransformX >= 600))
+    .filter(({ shipTransformX }) => (shipTransformX >= 600))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -295,7 +295,7 @@ function asteroids() {
 
   // If ship goes out of left hand side of the screen
   shipWrappingState
-    .filter(({ shipTransformX, ship }) => (shipTransformX <= 0))
+    .filter(({ shipTransformX }) => (shipTransformX <= 0))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -306,7 +306,7 @@ function asteroids() {
 
   // if ship leaves top of screen
   shipWrappingState
-    .filter(({ shipTransformY, ship }) => (shipTransformY >= 600))
+    .filter(({ shipTransformY }) => (shipTransformY >= 600))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -317,7 +317,7 @@ function asteroids() {
 
   // if ship leaves bottom of screen
   shipWrappingState
-    .filter(({ shipTransformY, ship }) => (shipTransformY <= 0))
+    .filter(({ shipTransformY }) => (shipTransformY <= 0))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
@@ -354,10 +354,9 @@ function asteroids() {
 
 
   let polygonTag  = document.querySelector("polygon"),
-      polygonBBox = polygonTag.getBBox()                // get the width or height
+      polygonBBox = polygonTag.getBBox()                // get the width or height of the polygon element g
 
-  /* Logic for person colliding with asteroid */
-  //TODO FIX THIS
+  /* LOGIC FOR SPACESHIP COLLIDING WITH ASTEROID*/
   mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
     return ({
       asteroidArray : asteroidArray,
@@ -371,20 +370,16 @@ function asteroids() {
     ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     // add function here to show game over
   })
-  )
-    .subscribe(() => console.log)
+  ).subscribe(() => console.log)
+
+  // impure function to update the score
+  function updateScore(score) {
+    document.getElementById("score").innerHTML = "Score: " + score
+  }
+
+
 
 }
-
-// svgWidth = svg.width.baseVal.value
-
-
-//ownerSVGElement, baseVal
-// ownerSVGElement, baseval, , viewportElement, clientHeight
-
-
-
-
 
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.
@@ -392,5 +387,3 @@ if (typeof window != 'undefined')
   window.onload = () => {
     asteroids();
   }
-
-

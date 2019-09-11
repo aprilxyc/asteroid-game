@@ -1,6 +1,6 @@
 "use strict";
 function asteroids() {
-    const arrayOfAsteroids = [], arrayOfBullets = [];
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0;
     let gameComplete = false;
     const mainTimer = Observable.interval(5);
     const asteroidObservable = Observable.interval(1);
@@ -11,7 +11,7 @@ function asteroids() {
         ship: g,
         shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
         shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
-        shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle)
+        shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle),
     }));
     const svg = document.getElementById("canvas");
     const g = new Elem(svg, 'g')
@@ -41,7 +41,7 @@ function asteroids() {
     }).filter(({ key }) => (key == "ArrowLeft"))
         .flatMap((key) => (Observable.interval(15)
         .takeUntil(keyup$)))
-        .subscribe(({ spaceship }) => {
+        .subscribe(({}) => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation - 10})`);
     });
@@ -67,8 +67,8 @@ function asteroids() {
         transformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
         shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle),
     }))
-        .filter(({ key, transformX, transformY, shipRotation }) => (key == " "))
-        .subscribe(({ key, transformX, transformY, shipRotation }) => {
+        .filter(({ key }) => (key == " "))
+        .subscribe(({ transformX, transformY, shipRotation }) => {
         const rotationRadians = shipRotation * (Math.PI / 180);
         let bulletShot = new Elem(svg, 'circle')
             .attr("style", "fill:#ffffff;stroke:#ffffff;stroke-width:2")
@@ -120,11 +120,6 @@ function asteroids() {
         arrayOfAsteroids.push(asteroid);
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
-        console.log("asteriod: " + asteroid.attr("splitCounter"));
-        console.log("asteroidX: " + asteroidX);
-        console.log("asteroidY: " + asteroidY);
-        console.log("asteroidRadius: " + asteroidRadius);
-        console.log("splitcount: " + asteroidSplitCounter);
         if (asteroid.attr("splitCounter") != 0) {
             let asteroid1 = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
@@ -152,37 +147,40 @@ function asteroids() {
                 .forEach((bullet) => {
                 bullet.elem.remove();
                 arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
+                myScore += 10;
+                updateScore(myScore);
                 splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")));
                 asteroid.elem.remove();
                 arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
             });
         });
     }).subscribe(() => console.log);
-    let shipWrappingState = mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
+    const shipWrappingState = mainAsteroidsObservable
+        .map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
         shipTransformX,
         shipTransformY,
         ship
     }));
     shipWrappingState
-        .filter(({ shipTransformX, ship }) => (shipTransformX >= 600))
+        .filter(({ shipTransformX }) => (shipTransformX >= 600))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`);
     });
     shipWrappingState
-        .filter(({ shipTransformX, ship }) => (shipTransformX <= 0))
+        .filter(({ shipTransformX }) => (shipTransformX <= 0))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX = 600} ${transformY}) rotate(${shipRotation})`);
     });
     shipWrappingState
-        .filter(({ shipTransformY, ship }) => (shipTransformY >= 600))
+        .filter(({ shipTransformY }) => (shipTransformY >= 600))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY = 0}) rotate(${shipRotation})`);
     });
     shipWrappingState
-        .filter(({ shipTransformY, ship }) => (shipTransformY <= 0))
+        .filter(({ shipTransformY }) => (shipTransformY <= 0))
         .subscribe(() => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY = 600}) rotate(${shipRotation})`);
@@ -208,8 +206,10 @@ function asteroids() {
     }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) => checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))).map((e) => {
         gameComplete = true;
         ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
-    }))
-        .subscribe(() => console.log);
+    })).subscribe(() => console.log);
+    function updateScore(score) {
+        document.getElementById("score").innerHTML = "Score: " + score;
+    }
 }
 if (typeof window != 'undefined')
     window.onload = () => {

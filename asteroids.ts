@@ -392,12 +392,10 @@ function asteroids() {
         asteroidArray.forEach((asteroid) => {
           asteroidArray.splice(asteroidArray.indexOf(asteroid), 1)
           asteroid.elem.remove()
+          console.log(asteroidArray)
         })
-    )}).subscribe((e) => console.log(e))
+    )}).subscribe(() => console.log
     
-    
-    
-        
   // impure function to update the score
   function updateScore(score: number) {
     document.getElementById("score")!.innerHTML = "Score: " + score

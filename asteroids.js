@@ -223,14 +223,13 @@ function asteroids() {
         return (asteroidArray.forEach((asteroid) => {
             asteroidArray.splice(asteroidArray.indexOf(asteroid), 1);
             asteroid.elem.remove();
+            console.log(asteroidArray);
         }));
-    }).subscribe((e) => console.log(e));
-    function updateScore(score) {
+    }).subscribe(() => console.log, function updateScore(score) {
         document.getElementById("score").innerHTML = "Score: " + score;
-    }
-    function updateLives(lives) {
+    }, function updateLives(lives) {
         document.getElementById("lives").innerHTML = "Lives: " + lives;
-    }
+    });
 }
 if (typeof window != 'undefined')
     window.onload = () => {

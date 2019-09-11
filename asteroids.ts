@@ -24,6 +24,9 @@ function asteroids() {
 
   // powerups where all the asteroids disappear from the screen 
 
+  // document.getElementByID = ("lives")
+  // lives [1,1,1] --> scan it 
+
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
   const          arrayOfAsteroids: Elem[] = [],   // array of bullets
@@ -41,7 +44,7 @@ function asteroids() {
     ).map(_ => ({
       bulletArray   : arrayOfBullets,
       asteroidArray : arrayOfAsteroids,
-      ship: g,
+      ship          : g,
       shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
       shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
       shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle)
@@ -161,15 +164,8 @@ function asteroids() {
 
   // Checks for collisons 
   function checkCollision(x1: number, x2: number, y1: number, y2: number, radius1: number, radius2: number) {
-    console.log("x1: " + x1)
-    console.log("x2: " + x2)
-    console.log("y1: " + y1)
-    console.log("y2: " + y2)
-    console.log("radius: " + radius1)
-
     let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))),
         sumOfRadii     = (radius1 + radius2)
-    console.log(lineOfDistance <= sumOfRadii)
     return lineOfDistance <= sumOfRadii
   }
 
@@ -181,20 +177,17 @@ function asteroids() {
   }
 
   function getDirection() {
-    return getRandomInt(0, 2) === 0? -1: 1; 
-}
-
-  let x_velocity = getRandomInt(1,8); // the number will be between -8 and 8 excluding 0
-  let y_velocity = getRandomInt(1,8); // same here
+    return getRandomInt(0, 2) === 0 ? -1: 1;
+  }
 
 
-
-   /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
+  /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
   mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-    asteroidArray.forEach((asteroid) => 
-      asteroid.attr("cx", (Math.random() * directionX) + parseFloat(asteroid.attr("cx")))
-      .attr("cy", (Math.random() * directionY) + parseFloat(asteroid.attr("cy")))
-      )
+    asteroidArray.forEach((asteroid) => {
+      asteroid.attr("cx", parseFloat(asteroid.attr("directionX")) + parseFloat(asteroid.attr("cx")))
+        .attr("cy", parseFloat(asteroid.attr("directionY")) + parseFloat(asteroid.attr("cy")))
+    }
+    )
   })
 
   //     /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
@@ -212,6 +205,8 @@ function asteroids() {
         .attr("cy", asteroidRandomY)
         .attr("r", 50)
         .attr("splitCounter", 3)
+        .attr("directionX", Math.random())
+        .attr("directionY", Math.random())
 
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
@@ -221,24 +216,25 @@ function asteroids() {
   function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
     // add 2 new asteroid into the array
     // if split counter is not greater than 3
+
     if (asteroid.attr("splitCounter") != 0) {
-        let asteroid1 = new Elem(svg, "circle")
-          .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
-          .attr("cx", asteroidX -10)
-          .attr("cy", asteroidY -10)
-          .attr("r", asteroidRadius = asteroidRadius - 20)
-          .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
-        
-        arrayOfAsteroids.push(asteroid1)
+      let asteroid1 = new Elem(svg, "circle")
+        .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+        .attr("cx", asteroidX - 10)
+        .attr("cy", asteroidY - 10)
+        .attr("r", asteroidRadius - 20)
+        .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
 
-        let asteroid2 = new Elem(svg, "circle")
-          .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
-          .attr("cx", asteroidX + 10)
-          .attr("cy", asteroidY + 10)
-          .attr("r", asteroidRadius = asteroidRadius - 20)
-          .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+      arrayOfAsteroids.push(asteroid1)
 
-          arrayOfAsteroids.push(asteroid2)
+      let asteroid2 = new Elem(svg, "circle")
+        .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+        .attr("cx", asteroidX + 10)
+        .attr("cy", asteroidY + 10)
+        .attr("r", asteroidRadius - 20)
+        .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+
+      arrayOfAsteroids.push(asteroid2)
     }
   }
 
@@ -266,113 +262,112 @@ function asteroids() {
   /* Constantly checking for screen wraps */
 
   let shipWrappingState
-   = 
-  mainAsteroidsObservable.map(({ship, shipTransformX, shipTransformY, shipRotation}) => ({
-    shipTransformX,
-    shipTransformY,
-    ship
-  }))
+     = 
+    mainAsteroidsObservable.map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
+      shipTransformX,
+      shipTransformY,
+      ship
+    }))
 
   // If ship goes out of right hand side of the screen
   shipWrappingState
-  .filter(({shipTransformX, ship}) => (shipTransformX >= 600))
-  .subscribe(() => {
-    let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
-        transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
-        shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
-    
-    g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`)
-  })
-
-    // If ship goes out of left hand side of the screen
-    shipWrappingState
-    .filter(({shipTransformX, ship}) => (shipTransformX <= 0))
+    .filter(({ shipTransformX, ship }) => (shipTransformX >= 600))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
-      
+
+      g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`)
+    })
+
+  // If ship goes out of left hand side of the screen
+  shipWrappingState
+    .filter(({ shipTransformX, ship }) => (shipTransformX <= 0))
+    .subscribe(() => {
+      let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+          transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
+          shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
+
       g.attr("transform", `translate(${transformX = 600} ${transformY}) rotate(${shipRotation})`)
     })
 
-    // if ship leaves top of screen
-    shipWrappingState
-    .filter(({shipTransformY, ship}) => (shipTransformY >= 600))
+  // if ship leaves top of screen
+  shipWrappingState
+    .filter(({ shipTransformY, ship }) => (shipTransformY >= 600))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
-      
+
       g.attr("transform", `translate(${transformX} ${transformY = 0}) rotate(${shipRotation})`)
     })
 
-    // if ship leaves bottom of screen
+  // if ship leaves bottom of screen
   shipWrappingState
-  .filter(({shipTransformY, ship}) => (shipTransformY <= 0))
+    .filter(({ shipTransformY, ship }) => (shipTransformY <= 0))
     .subscribe(() => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
-      
+
       g.attr("transform", `translate(${transformX} ${transformY = 600}) rotate(${shipRotation})`)
     })
 
-    // save the asteroid wrapping as a state
-    let asteroidWrappingState = 
-   mainAsteroidsObservable.map(({asteroidArray}) => {
-     return asteroidArray // get the array itself
-   })
+  // save the asteroid wrapping as a state
+  let asteroidWrappingState = 
+    mainAsteroidsObservable.map(({ asteroidArray }) => {
+      return asteroidArray // get the array itself
+    })
 
-   // going out of right screen
-   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 650)
-   .map((asteroid) => asteroid.attr("cx", -50))
-   )
-   .subscribe(() => console.log)
+  // going out of right screen
+  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
+    .map((asteroid) => asteroid.attr("cx", 0))
+  ).subscribe(() => console.log)
 
-   // going out of top screen
-   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 650)
-   .map((asteroid) => asteroid.attr("cy", -50))
-   )
-   .subscribe(() => console.log)
+  // going out of top screen
+  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 600)
+    .map((asteroid) => asteroid.attr("cy", 0))
+  ).subscribe(() => console.log)
 
-  // //  // going out of left screen
-  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) <= -30)
-  //  .map((asteroid) => asteroid.attr("cx", 650))
-  //  )
-  //  .subscribe(() => console.log)
+  // going out of left screen
+  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) <= 0)
+  //   .map((asteroid) => asteroid.attr("cx", 600))
+  // )
+  //   .subscribe(() => console.log)
 
-  //  // going out of bottom screen
-  //  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= -50)
-  //  .map((asteroid) => asteroid.attr("cx", 650))
-  //  )
-  //  .subscribe(() => console.log)
-  
+  // going out of bottom screen
+  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= -50)
+  //   .map((asteroid) => asteroid.attr("cx", 650))
+  // )
+  //   .subscribe(() => console.log)
 
-  let polygonTag = document.querySelector("polygon"),
-      polygonBBox = polygonTag.getBBox() // get the width or height
-  
+
+  let polygonTag  = document.querySelector("polygon"),
+      polygonBBox = polygonTag.getBBox()                // get the width or height
+
   /* Logic for person colliding with asteroid */
   //TODO FIX THIS
-  mainAsteroidsObservable.map(({asteroidArray, shipTransformX, shipTransformY}) => {
+  mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
     return ({
-      asteroidArray:asteroidArray,
+      asteroidArray : asteroidArray,
       shipTransformX: shipTransformX,
       shipTransformY: shipTransformY
-    })}).forEach(({asteroidArray, shipTransformX, shipTransformY}) => asteroidArray.filter((asteroid) => 
-      checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))
-    ).map((e) => {
-      gameComplete = true;
-      ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
-      // add function here to show game over
     })
-    )
-  .subscribe(() => console.log)
-  
+  }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) =>
+    checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))
+  ).map((e) => {
+    gameComplete = true;
+    ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
+    // add function here to show game over
+  })
+  )
+    .subscribe(() => console.log)
+
 }
 
-  // svgWidth = svg.width.baseVal.value
+// svgWidth = svg.width.baseVal.value
 
-  
+
 //ownerSVGElement, baseVal
 // ownerSVGElement, baseval, , viewportElement, clientHeight
 
@@ -386,7 +381,5 @@ if (typeof window != 'undefined')
   window.onload = () => {
     asteroids();
   }
-
-
 
 

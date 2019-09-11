@@ -89,13 +89,7 @@ function asteroids() {
         });
     });
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
-        console.log("x1: " + x1);
-        console.log("x2: " + x2);
-        console.log("y1: " + y1);
-        console.log("y2: " + y2);
-        console.log("radius: " + radius1);
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
-        console.log(lineOfDistance <= sumOfRadii);
         return lineOfDistance <= sumOfRadii;
     }
     function getRandomInt(min, max) {
@@ -104,11 +98,11 @@ function asteroids() {
     function getDirection() {
         return getRandomInt(0, 2) === 0 ? -1 : 1;
     }
-    let x_velocity = getRandomInt(1, 8);
-    let y_velocity = getRandomInt(1, 8);
     mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-        asteroidArray.forEach((asteroid) => asteroid.attr("cx", (Math.random() * directionX) + parseFloat(asteroid.attr("cx")))
-            .attr("cy", (Math.random() * directionY) + parseFloat(asteroid.attr("cy"))));
+        asteroidArray.forEach((asteroid) => {
+            asteroid.attr("cx", parseFloat(asteroid.attr("directionX")) + parseFloat(asteroid.attr("cx")))
+                .attr("cy", parseFloat(asteroid.attr("directionY")) + parseFloat(asteroid.attr("cy")));
+        });
     });
     mainAsteroidsObservable.
         takeUntil(asteroidObservable.filter(i => i == 7))
@@ -120,7 +114,9 @@ function asteroids() {
             .attr("cx", asteroidRandomX)
             .attr("cy", asteroidRandomY)
             .attr("r", 50)
-            .attr("splitCounter", 3);
+            .attr("splitCounter", 3)
+            .attr("directionX", Math.random())
+            .attr("directionY", Math.random());
         arrayOfAsteroids.push(asteroid);
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
@@ -129,14 +125,14 @@ function asteroids() {
                 .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
                 .attr("cx", asteroidX - 10)
                 .attr("cy", asteroidY - 10)
-                .attr("r", asteroidRadius = asteroidRadius - 20)
+                .attr("r", asteroidRadius - 20)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
             arrayOfAsteroids.push(asteroid1);
             let asteroid2 = new Elem(svg, "circle")
                 .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
                 .attr("cx", asteroidX + 10)
                 .attr("cy", asteroidY + 10)
-                .attr("r", asteroidRadius = asteroidRadius - 20)
+                .attr("r", asteroidRadius - 20)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
             arrayOfAsteroids.push(asteroid2);
         }
@@ -185,12 +181,10 @@ function asteroids() {
     let asteroidWrappingState = mainAsteroidsObservable.map(({ asteroidArray }) => {
         return asteroidArray;
     });
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 650)
-        .map((asteroid) => asteroid.attr("cx", -50)))
-        .subscribe(() => console.log);
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 650)
-        .map((asteroid) => asteroid.attr("cy", -50)))
-        .subscribe(() => console.log);
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
+        .map((asteroid) => asteroid.attr("cx", 0))).subscribe(() => console.log);
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 600)
+        .map((asteroid) => asteroid.attr("cy", 0))).subscribe(() => console.log);
     let polygonTag = document.querySelector("polygon"), polygonBBox = polygonTag.getBBox();
     mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
         return ({

@@ -57,10 +57,12 @@ function asteroids() {
   const g = new Elem(svg, 'g')
     .attr("transform", "translate(300 300) rotate(170)")
 
+  // my points
+  // .attr("points", "-15,20 15,20 0, -20")
   // create a polygon shape for the space ship as a child of the transform group 
   const ship = new Elem(svg, 'polygon', g.elem)
-    .attr("points", "-15,20 7,20 0,-20")
-    .attr("style", "fill:#f4e46c;stroke:#d3f08d;stroke-width:2")
+    .attr("points", "-15,20 0,15 15,20 0, -20")
+    .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2")
 
   // creates new observable that emits an event object everytime a keydown is fired
   // emits keyboard event everytime user presses down a key
@@ -200,7 +202,7 @@ function asteroids() {
 
       // create asteriod svg
       let asteroid = new Elem(svg, "circle")
-        .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+        .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
         .attr("cx", asteroidRandomX) // follow where the arrow is
         .attr("cy", asteroidRandomY)
         .attr("r", 50)
@@ -225,7 +227,7 @@ function asteroids() {
     if (asteroid.attr("splitCounter") != 0) {
 
       let asteroid1 = new Elem(svg, "circle")
-        .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+        .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
         .attr("cx", asteroidX + 20)
         .attr("cy", asteroidY + 20)
         .attr("r", asteroidRadius - 10)
@@ -236,7 +238,7 @@ function asteroids() {
       arrayOfAsteroids.push(asteroid1)
 
       let asteroid2 = new Elem(svg, "circle")
-        .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
+        .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
         .attr("cx", asteroidX - 20)
         .attr("cy", asteroidY - 20)
         .attr("r", asteroidRadius - 10)

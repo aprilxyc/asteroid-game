@@ -93,15 +93,15 @@ function asteroids() {
         return lineOfDistance <= sumOfRadii;
     }
     function getRandomInt(min, max) {
-        return Math.floor((Math.random() + min) * Math.floor(max));
+        return (Math.random() + min) * Math.floor(max);
     }
     function getDirection() {
         return getRandomInt(0, 2) === 0 ? -1 : 1;
     }
     mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
         asteroidArray.forEach((asteroid) => {
-            asteroid.attr("cx", parseFloat(asteroid.attr("directionX")) + parseFloat(asteroid.attr("cx")))
-                .attr("cy", parseFloat(asteroid.attr("directionY")) + parseFloat(asteroid.attr("cy")));
+            asteroid.attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx")))
+                .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy")));
         });
     });
     mainAsteroidsObservable.
@@ -115,25 +115,34 @@ function asteroids() {
             .attr("cy", asteroidRandomY)
             .attr("r", 50)
             .attr("splitCounter", 3)
-            .attr("directionX", Math.random())
-            .attr("directionY", Math.random());
+            .attr("directionX", getRandomInt(-1, 1))
+            .attr("directionY", getRandomInt(-1, 1));
         arrayOfAsteroids.push(asteroid);
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
+        console.log("asteriod: " + asteroid.attr("splitCounter"));
+        console.log("asteroidX: " + asteroidX);
+        console.log("asteroidY: " + asteroidY);
+        console.log("asteroidRadius: " + asteroidRadius);
+        console.log("splitcount: " + asteroidSplitCounter);
         if (asteroid.attr("splitCounter") != 0) {
             let asteroid1 = new Elem(svg, "circle")
                 .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
-                .attr("cx", asteroidX - 10)
-                .attr("cy", asteroidY - 10)
-                .attr("r", asteroidRadius - 20)
-                .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
+                .attr("cx", asteroidX + 20)
+                .attr("cy", asteroidY + 20)
+                .attr("r", asteroidRadius - 10)
+                .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+                .attr("directionX", getRandomInt(-1, 1))
+                .attr("directionY", getRandomInt(-1, 1));
             arrayOfAsteroids.push(asteroid1);
             let asteroid2 = new Elem(svg, "circle")
                 .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
-                .attr("cx", asteroidX + 10)
-                .attr("cy", asteroidY + 10)
-                .attr("r", asteroidRadius - 20)
-                .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1);
+                .attr("cx", asteroidX - 20)
+                .attr("cy", asteroidY - 20)
+                .attr("r", asteroidRadius - 10)
+                .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+                .attr("directionX", getRandomInt(-1, 1))
+                .attr("directionY", getRandomInt(-1, 1));
             arrayOfAsteroids.push(asteroid2);
         }
     }
@@ -181,10 +190,8 @@ function asteroids() {
     let asteroidWrappingState = mainAsteroidsObservable.map(({ asteroidArray }) => {
         return asteroidArray;
     });
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 600)
         .map((asteroid) => asteroid.attr("cx", 0))).subscribe(() => console.log);
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 600)
-        .map((asteroid) => asteroid.attr("cy", 0))).subscribe(() => console.log);
     let polygonTag = document.querySelector("polygon"), polygonBBox = polygonTag.getBBox();
     mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
         return ({

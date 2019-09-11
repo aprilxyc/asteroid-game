@@ -173,7 +173,7 @@ function asteroids() {
   //     // used to get a random integer for asteroid random movementts
   //     // inspired by: https://stackoverflow.com/questions/52015418/random-movement-angular
   function getRandomInt(min: number, max: number) {
-    return Math.floor((Math.random() + min) * Math.floor(max));
+    return (Math.random() + min) * Math.floor(max);
   }
 
   function getDirection() {
@@ -184,8 +184,8 @@ function asteroids() {
   /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
   mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
     asteroidArray.forEach((asteroid) => {
-      asteroid.attr("cx", parseFloat(asteroid.attr("directionX")) + parseFloat(asteroid.attr("cx")))
-        .attr("cy", parseFloat(asteroid.attr("directionY")) + parseFloat(asteroid.attr("cy")))
+      asteroid.attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx")))
+        .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy")))
     }
     )
   })
@@ -205,34 +205,44 @@ function asteroids() {
         .attr("cy", asteroidRandomY)
         .attr("r", 50)
         .attr("splitCounter", 3)
-        .attr("directionX", Math.random())
-        .attr("directionY", Math.random())
+        .attr("directionX", getRandomInt(-1, 1))
+        .attr("directionY", getRandomInt(-1, 1))
 
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
     })
 
 
-  function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
+  function splitAsteroid(asteroid, asteroidX: number, asteroidY: number, asteroidRadius: number, asteroidSplitCounter: number) {
+    console.log("asteriod: " + asteroid.attr("splitCounter"))
+    console.log("asteroidX: " + asteroidX)
+    console.log("asteroidY: " + asteroidY)
+    console.log("asteroidRadius: " + asteroidRadius)
+    console.log("splitcount: " + asteroidSplitCounter)
+
     // add 2 new asteroid into the array
     // if split counter is not greater than 3
-
     if (asteroid.attr("splitCounter") != 0) {
+
       let asteroid1 = new Elem(svg, "circle")
         .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
-        .attr("cx", asteroidX - 10)
-        .attr("cy", asteroidY - 10)
-        .attr("r", asteroidRadius - 20)
+        .attr("cx", asteroidX + 20)
+        .attr("cy", asteroidY + 20)
+        .attr("r", asteroidRadius - 10)
         .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+        .attr("directionX", getRandomInt(-1, 1))
+        .attr("directionY", getRandomInt(-1, 1))
 
       arrayOfAsteroids.push(asteroid1)
 
       let asteroid2 = new Elem(svg, "circle")
         .attr("style", "fill:#CAEBF2;stroke:#9bd5bd;stroke-width:2")
-        .attr("cx", asteroidX + 10)
-        .attr("cy", asteroidY + 10)
-        .attr("r", asteroidRadius - 20)
+        .attr("cx", asteroidX - 20)
+        .attr("cy", asteroidY - 20)
+        .attr("r", asteroidRadius - 10)
         .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
+        .attr("directionX", getRandomInt(-1, 1))
+        .attr("directionY", getRandomInt(-1, 1))
 
       arrayOfAsteroids.push(asteroid2)
     }
@@ -253,6 +263,7 @@ function asteroids() {
 
           // create new asteroids here - split here
           splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")))
+          // console.log("myasteroid array:" + arrayOfAsteroids)
           asteroid.elem.remove()
           arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
         })
@@ -320,26 +331,24 @@ function asteroids() {
     })
 
   // going out of right screen
-  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) >= 600)
+  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 600)
     .map((asteroid) => asteroid.attr("cx", 0))
   ).subscribe(() => console.log)
 
-  // going out of top screen
-  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= 600)
-    .map((asteroid) => asteroid.attr("cy", 0))
-  ).subscribe(() => console.log)
+  // // going out of top screen
+  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 600)
+  //   .map((asteroid) => asteroid.attr("cy", 0))
+  // ).subscribe(() => console.log)
 
-  // going out of left screen
-  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cx")) <= 0)
+  // // going out of left screen
+  // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= 0)
   //   .map((asteroid) => asteroid.attr("cx", 600))
-  // )
-  //   .subscribe(() => console.log)
+  // ).subscribe(() => console.log)
 
-  // going out of bottom screen
+  // // going out of bottom screen
   // asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) >= -50)
   //   .map((asteroid) => asteroid.attr("cx", 650))
-  // )
-  //   .subscribe(() => console.log)
+  // ).subscribe(() => console.log)
 
 
   let polygonTag  = document.querySelector("polygon"),

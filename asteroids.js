@@ -1,6 +1,6 @@
 "use strict";
 function asteroids() {
-    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3;
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, powerUp = 3, asteroidRespawn = false;
     let gameComplete = false;
     const mainTimer = Observable.interval(5);
     const asteroidObservable = Observable.interval(1);
@@ -19,7 +19,10 @@ function asteroids() {
     const ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 0,15 15,20 0, -20")
         .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2");
-    const keydown$ = Observable.fromEvent(document, 'keydown');
+    const keydown$ = Observable.fromEvent(document, 'keydown').map(({ keyCode }) => ({
+        asteroidArray: arrayOfAsteroids,
+        keyCode
+    }));
     const keyup$ = Observable.fromEvent(document, 'keyup');
     keydown$.map(({ key }) => {
         return ({
@@ -103,7 +106,7 @@ function asteroids() {
         });
     });
     mainAsteroidsObservable.
-        takeUntil(asteroidObservable.filter(i => i == 3))
+        takeUntil(asteroidObservable.filter(i => i == 8))
         .subscribe((e) => {
         let asteroidRandomX = getRandomInt(0, 600);
         let asteroidRandomY = getRandomInt(0, 600);
@@ -209,22 +212,19 @@ function asteroids() {
         gameComplete = true;
         ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     })).subscribe(() => console.log);
-    mainAsteroidsObservable.map(({ asteroidArray }) => {
+    keydown$.map(({ keyCode }) => {
         return ({
-            asteroidArray1: asteroidArray,
-            asteroidArray2: asteroidArray
+            keyCode,
+            spaceship: g,
+            asteroidArray: arrayOfAsteroids
         });
-    }).map(({ asteroidArray1, asteroidArray2 }) => {
-        asteroidArray1.forEach((asteroid1) => {
-            asteroidArray2.filter((asteroid2) => (checkCollision(parseFloat(asteroid1.attr("cx")), parseFloat(asteroid2.attr("cx")), parseFloat(asteroid1.attr("cy")), parseFloat(asteroid2.attr("cy")), parseFloat(asteroid1.attr("r")), parseFloat(asteroid2.attr("r")))))
-                .forEach((asteroid2) => {
-                asteroid2.attr("directionX", Number(asteroid2.attr("directionX")) * -1)
-                    .attr("directionY", Number(asteroid2.attr("directionY")) * -1);
-                asteroid1.attr("directionX", Number(asteroid1.attr("directionX")) * -1)
-                    .attr("directionY", Number(asteroid1.attr("directionY")) * -1);
-            });
-        });
-    }).subscribe(() => console.log);
+    }).filter(({ keyCode }) => (keyCode == 80))
+        .map(({ asteroidArray }) => {
+        return (asteroidArray.forEach((asteroid) => {
+            asteroidArray.splice(asteroidArray.indexOf(asteroid), 1);
+            asteroid.elem.remove();
+        }));
+    }).subscribe((e) => console.log(e));
     function updateScore(score) {
         document.getElementById("score").innerHTML = "Score: " + score;
     }

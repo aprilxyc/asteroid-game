@@ -29,10 +29,12 @@ function asteroids() {
 
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
-  let            arrayOfAsteroids: Elem[] = [],   // array of bullets
+  let            arrayOfAsteroids: Elem[] = [],    // array of bullets
   arrayOfBullets: Elem[]                  = [],
                  myScore                  = 0,
-                 lives                    = 3
+                 lives                    = 3,
+                 powerUp                  = 3,
+                 asteroidRespawn          = false
 
   let gameComplete = false
 
@@ -66,8 +68,11 @@ function asteroids() {
     .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2")
 
   // creates new observable that emits an event object everytime a keydown is fired
-  const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown');
-  const keyup$   = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
+  const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode}) => ({
+    asteroidArray: arrayOfAsteroids,
+    keyCode
+  }));
+  const keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
 
   /* LOGIC FOR KEY MOVEMENT  */
 
@@ -193,7 +198,7 @@ function asteroids() {
 
   /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
   mainAsteroidsObservable.
-    takeUntil(asteroidObservable.filter(i => i == 3)) // this part taken from Harsil's code
+    takeUntil(asteroidObservable.filter(i => i == 8)) // this part taken from Harsil's code
     .subscribe((e) => {
       // create random starting points
       let asteroidRandomX = getRandomInt(0, 600)
@@ -374,39 +379,25 @@ function asteroids() {
   })
   ).subscribe(() => console.log)
 
-  /* LOGIC FOR ASTEROIDS COLLIDING INTO ONE ANOTHER */
-  // mainAsteroidsObservable.map(({asteroidArray}) => {
-  //   asteroidArray.forEach((asteroid1, {asteroidArray}) => {
-  //       asteroidArray.filter((asteroid2) => (
-  //         checkCollision(parseFloat(asteroid1.attr("cx")), parseFloat(asteroid2.attr("cx")), parseFloat(asteroid1.attr("cy")), parseFloat(asteroid2.attr("cy")), parseFloat(asteroid1.attr("r")), parseFloat(asteroid2.attr("r")))
-  //       ))
-  //         .forEach((asteroid) => {
-  //           asteroid.attr("directionX", Number(asteroid.attr("directionX")) * -1)
-  //                   .attr("directionY", Number(asteroid.attr("directionY")) * -1) 
-  //         })
-  //   })
-
-  mainAsteroidsObservable.map(({asteroidArray}) => {
+  /* LOGIC FOR POWERUP */
+  keydown$.map(({ keyCode }) => {
     return ({
-      asteroidArray1: asteroidArray,
-      asteroidArray2: asteroidArray
+      keyCode,
+      spaceship    : g,
+      asteroidArray: arrayOfAsteroids
     })
-  }).map(({asteroidArray1, asteroidArray2}) => {
-    asteroidArray1.forEach((asteroid1) => {
-      asteroidArray2.filter((asteroid2) => (
-        checkCollision(parseFloat(asteroid1.attr("cx")), parseFloat(asteroid2.attr("cx")), parseFloat(asteroid1.attr("cy")), parseFloat(asteroid2.attr("cy")), parseFloat(asteroid1.attr("r")), parseFloat(asteroid2.attr("r")))
-      ))
-      .forEach((asteroid2) => {
-
-        asteroid2.attr("directionX", Number(asteroid2.attr("directionX")) * -1)
-                .attr("directionY", Number(asteroid2.attr("directionY")) * -1)
-
-        asteroid1.attr("directionX", Number(asteroid1.attr("directionX")) * -1)
-                .attr("directionY", Number(asteroid1.attr("directionY")) * -1)
-      })
-    })  
-  }).subscribe(() => console.log)
-
+  }).filter(({ keyCode }) => (keyCode == 80))
+    .map(({asteroidArray}) => {
+      return (
+        asteroidArray.forEach((asteroid) => {
+          asteroidArray.splice(asteroidArray.indexOf(asteroid), 1)
+          asteroid.elem.remove()
+        })
+    )}).subscribe((e) => console.log(e))
+    
+    
+    
+        
   // impure function to update the score
   function updateScore(score: number) {
     document.getElementById("score")!.innerHTML = "Score: " + score

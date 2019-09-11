@@ -31,7 +31,8 @@ function asteroids() {
   // save global variables so you can make objects reference them later - taken from Harsil's code
   let            arrayOfAsteroids: Elem[] = [],   // array of bullets
   arrayOfBullets: Elem[]                  = [],
-                 myScore                  = 0
+                 myScore                  = 0,
+                 lives                    = 3
 
   let gameComplete = false
 
@@ -48,7 +49,7 @@ function asteroids() {
       ship          : g,
       shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
       shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
-      shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle),
+      shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle)
     }))
 
   const svg = document.getElementById("canvas")!;
@@ -99,7 +100,7 @@ function asteroids() {
       Observable.interval(15)
         .takeUntil(keyup$)
     ))
-    .subscribe(({ ) => {
+    .subscribe(({ }) => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
@@ -171,23 +172,20 @@ function asteroids() {
     return lineOfDistance <= sumOfRadii
   }
 
-  /* LOGIC FOR RANDOM ASTEROID MOVEMENT */
-
-  // used to get a random integer for asteroid random movements
+  /* LOGIC FOR RANDOM ASTEROID MOVEMENT 
+   // used to get a random integer for asteroid random movements
   // inspired by: https://stackoverflow.com/questions/52015418/random-movement-angular
+  */
+
   function getRandomInt(min: number, max: number) {
     return (Math.random() + min) * Math.floor(max);
   }
 
-  function getDirection() {
-    return getRandomInt(0, 2) === 0 ? -1: 1;
-  }
-
-
   /*  LOGIC FOR MOVING THE ASTEROIDS RANDOMLY */
   mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
     asteroidArray.forEach((asteroid) => {
-      asteroid.attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx")))
+      asteroid
+        .attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx")))
         .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy")))
     }
     )
@@ -195,7 +193,7 @@ function asteroids() {
 
   /* LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY */
   mainAsteroidsObservable.
-    takeUntil(asteroidObservable.filter(i => i == 7)) // this part taken from Harsil's code
+    takeUntil(asteroidObservable.filter(i => i == 3)) // this part taken from Harsil's code
     .subscribe((e) => {
       // create random starting points
       let asteroidRandomX = getRandomInt(0, 600)
@@ -354,7 +352,7 @@ function asteroids() {
 
 
   let polygonTag  = document.querySelector("polygon"),
-      polygonBBox = polygonTag.getBBox()                // get the width or height of the polygon element g
+      polygonBBox = polygonTag!.getBBox()               // get the width or height of the polygon element g
 
   /* LOGIC FOR SPACESHIP COLLIDING WITH ASTEROID*/
   mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
@@ -366,18 +364,57 @@ function asteroids() {
   }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) =>
     checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))
   ).map((e) => {
+    lives -= 1
+    updateLives(lives)
+    return lives
+  }).filter((lives) => lives == 0).map(() => {
     gameComplete = true;
     ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     // add function here to show game over
   })
   ).subscribe(() => console.log)
 
+  /* LOGIC FOR ASTEROIDS COLLIDING INTO ONE ANOTHER */
+  // mainAsteroidsObservable.map(({asteroidArray}) => {
+  //   asteroidArray.forEach((asteroid1, {asteroidArray}) => {
+  //       asteroidArray.filter((asteroid2) => (
+  //         checkCollision(parseFloat(asteroid1.attr("cx")), parseFloat(asteroid2.attr("cx")), parseFloat(asteroid1.attr("cy")), parseFloat(asteroid2.attr("cy")), parseFloat(asteroid1.attr("r")), parseFloat(asteroid2.attr("r")))
+  //       ))
+  //         .forEach((asteroid) => {
+  //           asteroid.attr("directionX", Number(asteroid.attr("directionX")) * -1)
+  //                   .attr("directionY", Number(asteroid.attr("directionY")) * -1) 
+  //         })
+  //   })
+
+  mainAsteroidsObservable.map(({asteroidArray}) => {
+    return ({
+      asteroidArray1: asteroidArray,
+      asteroidArray2: asteroidArray
+    })
+  }).map(({asteroidArray1, asteroidArray2}) => {
+    asteroidArray1.forEach((asteroid1) => {
+      asteroidArray2.filter((asteroid2) => (
+        checkCollision(parseFloat(asteroid1.attr("cx")), parseFloat(asteroid2.attr("cx")), parseFloat(asteroid1.attr("cy")), parseFloat(asteroid2.attr("cy")), parseFloat(asteroid1.attr("r")), parseFloat(asteroid2.attr("r")))
+      ))
+      .forEach((asteroid2) => {
+
+        asteroid2.attr("directionX", Number(asteroid2.attr("directionX")) * -1)
+                .attr("directionY", Number(asteroid2.attr("directionY")) * -1)
+
+        asteroid1.attr("directionX", Number(asteroid1.attr("directionX")) * -1)
+                .attr("directionY", Number(asteroid1.attr("directionY")) * -1)
+      })
+    })  
+  }).subscribe(() => console.log)
+
   // impure function to update the score
-  function updateScore(score) {
-    document.getElementById("score").innerHTML = "Score: " + score
+  function updateScore(score: number) {
+    document.getElementById("score")!.innerHTML = "Score: " + score
   }
 
-
+  function updateLives(lives: number) {
+    document.getElementById("lives")!.innerHTML = "Lives: " + lives
+  }
 
 }
 

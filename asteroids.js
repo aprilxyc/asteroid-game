@@ -1,6 +1,6 @@
 "use strict";
 function asteroids() {
-    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0;
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3;
     let gameComplete = false;
     const mainTimer = Observable.interval(5);
     const asteroidObservable = Observable.interval(1);
@@ -11,7 +11,7 @@ function asteroids() {
         ship: g,
         shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
         shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
-        shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle),
+        shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle)
     }));
     const svg = document.getElementById("canvas");
     const g = new Elem(svg, 'g')
@@ -95,17 +95,15 @@ function asteroids() {
     function getRandomInt(min, max) {
         return (Math.random() + min) * Math.floor(max);
     }
-    function getDirection() {
-        return getRandomInt(0, 2) === 0 ? -1 : 1;
-    }
     mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
         asteroidArray.forEach((asteroid) => {
-            asteroid.attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx")))
+            asteroid
+                .attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx")))
                 .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy")));
         });
     });
     mainAsteroidsObservable.
-        takeUntil(asteroidObservable.filter(i => i == 7))
+        takeUntil(asteroidObservable.filter(i => i == 3))
         .subscribe((e) => {
         let asteroidRandomX = getRandomInt(0, 600);
         let asteroidRandomY = getRandomInt(0, 600);
@@ -204,11 +202,34 @@ function asteroids() {
             shipTransformY: shipTransformY
         });
     }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) => checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))).map((e) => {
+        lives -= 1;
+        updateLives(lives);
+        return lives;
+    }).filter((lives) => lives == 0).map(() => {
         gameComplete = true;
         ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     })).subscribe(() => console.log);
+    mainAsteroidsObservable.map(({ asteroidArray }) => {
+        return ({
+            asteroidArray1: asteroidArray,
+            asteroidArray2: asteroidArray
+        });
+    }).map(({ asteroidArray1, asteroidArray2 }) => {
+        asteroidArray1.forEach((asteroid1) => {
+            asteroidArray2.filter((asteroid2) => (checkCollision(parseFloat(asteroid1.attr("cx")), parseFloat(asteroid2.attr("cx")), parseFloat(asteroid1.attr("cy")), parseFloat(asteroid2.attr("cy")), parseFloat(asteroid1.attr("r")), parseFloat(asteroid2.attr("r")))))
+                .forEach((asteroid2) => {
+                asteroid2.attr("directionX", Number(asteroid2.attr("directionX")) * -1)
+                    .attr("directionY", Number(asteroid2.attr("directionY")) * -1);
+                asteroid1.attr("directionX", Number(asteroid1.attr("directionX")) * -1)
+                    .attr("directionY", Number(asteroid1.attr("directionY")) * -1);
+            });
+        });
+    }).subscribe(() => console.log);
     function updateScore(score) {
         document.getElementById("score").innerHTML = "Score: " + score;
+    }
+    function updateLives(lives) {
+        document.getElementById("lives").innerHTML = "Lives: " + lives;
     }
 }
 if (typeof window != 'undefined')

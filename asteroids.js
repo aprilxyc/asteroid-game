@@ -136,15 +136,19 @@ function asteroids() {
     mainAsteroidsObservable
         .filter(({ asteroidArray }) => asteroidArray.length == 0)
         .subscribe((e) => {
-        let asteroid = new Elem(svg, "circle")
-            .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-            .attr("cx", getRandomInt(0, 600))
-            .attr("cy", getRandomInt(0, 600))
-            .attr("r", 50)
-            .attr("splitCounter", 3)
-            .attr("directionX", getRandomInt(-1, 1))
-            .attr("directionY", getRandomInt(-1, 1));
-        arrayOfAsteroids.push(asteroid);
+        Observable.interval(15)
+            .takeUntil(Observable.interval(200))
+            .map(() => {
+            const asteroid = new Elem(svg, "circle")
+                .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
+                .attr("cx", getRandomInt(0, 600))
+                .attr("cy", getRandomInt(0, 600))
+                .attr("r", 50)
+                .attr("splitCounter", 3)
+                .attr("directionX", getRandomInt(-1, 1))
+                .attr("directionY", getRandomInt(-1, 1));
+            arrayOfAsteroids.push(asteroid);
+        });
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {
@@ -254,6 +258,17 @@ function asteroids() {
         .forEach((arrayOfAsteroids) => {
         arrayOfAsteroids.splice(0, arrayOfAsteroids.length);
         removeCircleCanvas();
+        Observable.interval(15)
+            .takeUntil(Observable.interval(200))
+            .map(() => {
+            const explosion = new Elem(svg, 'circle')
+                .attr("style", "fill:#ea3e58;stroke:#ea3e58;stroke-width:2")
+                .attr("fill-opacity", 0.1)
+                .attr("opacity", 0.1)
+                .attr("cx", 300)
+                .attr("cy", 300)
+                .attr("r", 50);
+        }).subscribe(_ => console.log);
     }).subscribe((arrayOfAsteroids) => console.log(arrayOfAsteroids));
     function updateHTMLElements(score, lives, bomb) {
         document.getElementById("score").innerHTML = "Score: " + score;

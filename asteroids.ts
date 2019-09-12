@@ -13,28 +13,22 @@ function asteroids() {
   // Explain which ideas you have used ideas from the lectures to 
   // create reusable, generic functions.
 
-  //REMINDER CHANGE EVERYTHING TO CONST
-  //REMINDER TO ASK ABOUT HOW TO DO RANDOM MMOVEMENT
-  // REMINDER TO TALK ASK ABOUT HOW TO SPLIT IT PROPERL IN A FUNCTIONAL WAY
-
   // make levels and if you get to certain amount of points, the background will change
   // you win when you hit a certain amount of points
 
   // have a random booster that that shows up every 10 seconds -> gives you more points
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
-  let            arrayOfAsteroids: Elem[] = [],   // array of bullets
+  let            arrayOfAsteroids: Elem[] = [],    // array of bullets
   arrayOfBullets: Elem[]                  = [],
                  myScore                  = 0,
                  lives                    = 3,
-                 bomb                     = 3
+                 bomb                     = 3,
+                 gameComplete             = false
 
-  let   gameComplete = false
-  const mainTimer    = Observable.interval(5)
-
-  const asteroidObservable = Observable.interval(1)
-
-  const mainAsteroidsObservable = mainTimer
+  const mainTimer               = Observable.interval(5),
+        asteroidObservable      = Observable.interval(1),
+        mainAsteroidsObservable = mainTimer
     .takeUntil(
       mainTimer.filter(_ => gameComplete == true)
     ).map(_ => ({
@@ -44,7 +38,8 @@ function asteroids() {
       shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
       shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
       shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle)
-    }))
+    })),
+    scoreIncrease = 10
 
   const svg = document.getElementById("canvas")!,
   
@@ -221,8 +216,8 @@ function asteroids() {
     .takeUntil(asteroidObservable.filter(timer => timer == 8)) // this part taken from Harsil's code
     .subscribe((e) => {
       // create random starting points
-      let asteroidRandomX = getRandomInt(0, 600)
-      let asteroidRandomY = getRandomInt(0, 600)
+      let asteroidRandomX = getRandomInt(0, 600),
+          asteroidRandomY = getRandomInt(0, 600)
 
       // create asteriod svg
       let asteroid = new Elem(svg, "circle")
@@ -254,12 +249,14 @@ function asteroids() {
       Observable.interval(10)
       .takeUntil(Observable.interval(15))
       .map(() => {
+        let asteroidRandomX = getRandomInt(0, 600),
+            asteroidRandomY = getRandomInt(0, 600)
 
         // create asteriod svg
         const asteroid = new Elem(svg, "circle")
         .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-        .attr("cx", getRandomInt(0, 600)) // follow where the arrow is
-        .attr("cy", getRandomInt(0, 600))
+        .attr("cx", asteroidRandomX) // follow where the arrow is
+        .attr("cy", asteroidRandomY)
         .attr("r", 30)
         .attr("splitCounter", 3)
         .attr("directionX", getRandomInt(-1, 1))
@@ -279,12 +276,14 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
 
     // if split counter not equal to 0, then split it into 2 asteroids (with an offset for x and y coordinates)
     if (asteroid.attr("splitCounter") != 0) {
+      let asteroidChildrenOffset = 20,
+          asteroidNewRadius      = 10
 
       let asteroid1 = new Elem(svg, "circle")
         .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-        .attr("cx", asteroidX + 20)
-        .attr("cy", asteroidY + 20)
-        .attr("r", asteroidRadius - 10)
+        .attr("cx", asteroidX + asteroidChildrenOffset)
+        .attr("cy", asteroidY + asteroidChildrenOffset)
+        .attr("r", asteroidRadius - asteroidNewRadius)
         .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1) // decrement split counter so we know whether to split or not
         .attr("directionX", getRandomInt(-1, 1))
         .attr("directionY", getRandomInt(-1, 1))
@@ -293,9 +292,9 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
 
       let asteroid2 = new Elem(svg, "circle")
         .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-        .attr("cx", asteroidX - 20)
-        .attr("cy", asteroidY - 20)
-        .attr("r", asteroidRadius - 10)
+        .attr("cx", asteroidX - asteroidChildrenOffset)
+        .attr("cy", asteroidY - asteroidChildrenOffset)
+        .attr("r", asteroidRadius - asteroidNewRadius)
         .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
         .attr("directionX", getRandomInt(-1, 1))
         .attr("directionY", getRandomInt(-1, 1))
@@ -322,7 +321,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
 
           // increase score by 10 for each collision
-          myScore += 10
+          myScore += scoreIncrease
           updateHTMLElements(myScore, lives, bomb)
 
           // split asteroids into new asteroids here
@@ -529,9 +528,7 @@ LOGIC FOR USING BOMB POWERUP
       .attr("id", "gameOver")
 
     document.getElementById("gameOver")!.innerHTML = "GAME OVER"
-
   }
-
 }
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.

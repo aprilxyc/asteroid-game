@@ -1,10 +1,7 @@
 "use strict";
 function asteroids() {
-    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, bomb = 3;
-    let gameComplete = false;
-    const mainTimer = Observable.interval(5);
-    const asteroidObservable = Observable.interval(1);
-    const mainAsteroidsObservable = mainTimer
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, bomb = 3, gameComplete = false;
+    const mainTimer = Observable.interval(5), asteroidObservable = Observable.interval(1), mainAsteroidsObservable = mainTimer
         .takeUntil(mainTimer.filter(_ => gameComplete == true)).map(_ => ({
         bulletArray: arrayOfBullets,
         asteroidArray: arrayOfAsteroids,
@@ -12,7 +9,7 @@ function asteroids() {
         shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
         shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
         shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle)
-    }));
+    })), scoreIncrease = 10;
     const svg = document.getElementById("canvas");
     const g = new Elem(svg, 'g')
         .attr("transform", "translate(300 300) rotate(170)");
@@ -120,8 +117,7 @@ function asteroids() {
     mainAsteroidsObservable
         .takeUntil(asteroidObservable.filter(timer => timer == 8))
         .subscribe((e) => {
-        let asteroidRandomX = getRandomInt(0, 600);
-        let asteroidRandomY = getRandomInt(0, 600);
+        let asteroidRandomX = getRandomInt(0, 600), asteroidRandomY = getRandomInt(0, 600);
         let asteroid = new Elem(svg, "circle")
             .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
             .attr("cx", asteroidRandomX)
@@ -139,10 +135,11 @@ function asteroids() {
         Observable.interval(10)
             .takeUntil(Observable.interval(15))
             .map(() => {
+            let asteroidRandomX = getRandomInt(0, 600), asteroidRandomY = getRandomInt(0, 600);
             const asteroid = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-                .attr("cx", getRandomInt(0, 600))
-                .attr("cy", getRandomInt(0, 600))
+                .attr("cx", asteroidRandomX)
+                .attr("cy", asteroidRandomY)
                 .attr("r", 30)
                 .attr("splitCounter", 3)
                 .attr("directionX", getRandomInt(-1, 1))
@@ -152,20 +149,21 @@ function asteroids() {
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {
+            let asteroidChildrenOffset = 20, asteroidNewRadius = 10;
             let asteroid1 = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-                .attr("cx", asteroidX + 20)
-                .attr("cy", asteroidY + 20)
-                .attr("r", asteroidRadius - 10)
+                .attr("cx", asteroidX + asteroidChildrenOffset)
+                .attr("cy", asteroidY + asteroidChildrenOffset)
+                .attr("r", asteroidRadius - asteroidNewRadius)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
                 .attr("directionX", getRandomInt(-1, 1))
                 .attr("directionY", getRandomInt(-1, 1));
             arrayOfAsteroids.push(asteroid1);
             let asteroid2 = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-                .attr("cx", asteroidX - 20)
-                .attr("cy", asteroidY - 20)
-                .attr("r", asteroidRadius - 10)
+                .attr("cx", asteroidX - asteroidChildrenOffset)
+                .attr("cy", asteroidY - asteroidChildrenOffset)
+                .attr("r", asteroidRadius - asteroidNewRadius)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
                 .attr("directionX", getRandomInt(-1, 1))
                 .attr("directionY", getRandomInt(-1, 1));
@@ -178,7 +176,7 @@ function asteroids() {
                 .forEach((bullet) => {
                 bullet.elem.remove();
                 arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
-                myScore += 10;
+                myScore += scoreIncrease;
                 updateHTMLElements(myScore, lives, bomb);
                 splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")));
                 asteroid.elem.remove();

@@ -31,7 +31,7 @@ function asteroids() {
     }).filter(({ key, keyCode }) => (key == "ArrowRight" || keyCode == 68))
         .flatMap((key) => (Observable.interval(15)
         .takeUntil(keyup$)))
-        .subscribe(({ spaceship }) => {
+        .subscribe(({}) => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation + 10})`);
     });
@@ -71,14 +71,14 @@ function asteroids() {
     }))
         .filter(({ key, keyCode }) => (key == " "))
         .subscribe(({ transformX, transformY, shipRotation }) => {
-        const rotationRadians = shipRotation * (Math.PI / 180);
+        const rotationRadians = shipRotation * (Math.PI / 180), bullCalculateX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 1, bullCalculateY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 1;
         let bulletShot = new Elem(svg, 'circle')
             .attr("style", "fill:#ffffff;stroke:#ffffff;stroke-width:2")
             .attr("cx", transformX)
             .attr("cy", transformY)
             .attr("r", 3)
-            .attr("bulletDistanceX", Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 1)
-            .attr("bulletDistanceY", Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 1);
+            .attr("bulletDistanceX", bullCalculateX)
+            .attr("bulletDistanceY", bullCalculateY);
         arrayOfBullets.push(bulletShot);
     });
     mainAsteroidsObservable.subscribe(({ bulletArray }) => {
@@ -95,8 +95,8 @@ function asteroids() {
         return Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))) <= (radius1 + radius2);
     }
     function checkShipCollision(x1, x2, y1, y2, radius1, radius2, shipTransformX, shipTransformY, shipRotation) {
-        let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
-        if (lineOfDistance <= sumOfRadii) {
+        let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), radiiSum = radius1 + radius2;
+        if (lineOfDistance <= radiiSum) {
             g.attr("transform", `translate(300 300) rotate(300)`);
             --lives;
             updateHTMLElements(myScore, lives, bomb);
@@ -116,7 +116,7 @@ function asteroids() {
     });
     mainAsteroidsObservable
         .takeUntil(asteroidObservable.filter(timer => timer == 8))
-        .subscribe((e) => {
+        .subscribe(({}) => {
         let asteroidRandomX = getRandomInt(0, 600), asteroidRandomY = getRandomInt(0, 600);
         let asteroid = new Elem(svg, "circle")
             .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
@@ -131,7 +131,7 @@ function asteroids() {
     });
     mainAsteroidsObservable
         .filter(({ asteroidArray }) => asteroidArray.length == 0)
-        .subscribe((e) => {
+        .subscribe(({}) => {
         Observable.interval(10)
             .takeUntil(Observable.interval(15))
             .map(() => {
@@ -145,7 +145,7 @@ function asteroids() {
                 .attr("directionX", getRandomInt(-1, 1))
                 .attr("directionY", getRandomInt(-1, 1));
             arrayOfAsteroids.push(asteroid);
-        }).subscribe(() => console.log);
+        }).subscribe(_ => { });
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {
@@ -183,7 +183,7 @@ function asteroids() {
                 arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
             });
         });
-    }).subscribe(() => console.log);
+    }).subscribe(_ => { });
     const shipWrappingState = mainAsteroidsObservable
         .map(({ ship, shipTransformX, shipTransformY, shipRotation }) => ({
         shipTransformX,

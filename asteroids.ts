@@ -78,7 +78,7 @@ function asteroids() {
       Observable.interval(15)
         .takeUntil(keyup$)
     ))
-    .subscribe(({ spaceship }) => {
+    .subscribe(({ }) => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
@@ -134,7 +134,9 @@ function asteroids() {
     }))
     .filter(({ key, keyCode}) => (key == " "))
     .subscribe(({ transformX, transformY, shipRotation }) => {
-      const rotationRadians = shipRotation * (Math.PI / 180)
+      const rotationRadians = shipRotation * (Math.PI / 180),
+            bullCalculateX  = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 1,   // trigonometry calculations ensure bullets shoot from tip of ship (a triangle)
+            bullCalculateY  = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 1
 
       // create bullets
       let bulletShot = new Elem(svg, 'circle')
@@ -142,8 +144,8 @@ function asteroids() {
         .attr("cx", transformX) // follow where the arrow is
         .attr("cy", transformY)
         .attr("r", 3)
-        .attr("bulletDistanceX", Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 1)
-        .attr("bulletDistanceY", Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 1)
+        .attr("bulletDistanceX", bullCalculateX)
+        .attr("bulletDistanceY", bullCalculateY)
 
       // push bullet into array
       arrayOfBullets.push(bulletShot)
@@ -178,10 +180,10 @@ function asteroids() {
   */
   function checkShipCollision(x1: number, x2: number, y1: number, y2: number, radius1: number, radius2: number, shipTransformX: number, shipTransformY: number, shipRotation: number) {
     let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))),
-        sumOfRadii     = (radius1 + radius2)
+        radiiSum       = radius1 + radius2
 
     // if it has colliided, then move the ship to the middle of the screen againi and update lives
-    if (lineOfDistance <= sumOfRadii) {
+    if (lineOfDistance <= radiiSum) {
       g.attr("transform", `translate(300 300) rotate(300)`)
       --lives
       updateHTMLElements(myScore, lives, bomb)
@@ -202,10 +204,10 @@ function asteroids() {
   LOGIC FOR MOVING THE ASTEROIDS RANDOMLY
   */
   mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-    asteroidArray.forEach((asteroid) => {
+    asteroidArray.forEach((asteroid) => { // go through every asteroid in the asteroid array and set its movement
       asteroid
-        .attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx")))
-        .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy")))
+        .attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx"))) // set x to random direction + current x coordinate to get it movinig randomly
+        .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy"))) // set y to random direction + current y coordinate to get it movinig randomly
     }
     )
   })
@@ -219,7 +221,7 @@ function asteroids() {
   */
  mainAsteroidsObservable
     .takeUntil(asteroidObservable.filter(timer => timer == 8)) // this part taken from Harsil's code
-    .subscribe((e) => {
+    .subscribe(({}) => {
       // create random starting points
       let asteroidRandomX = getRandomInt(0, 600),
           asteroidRandomY = getRandomInt(0, 600)
@@ -248,7 +250,7 @@ function asteroids() {
   */
     mainAsteroidsObservable
     .filter(({asteroidArray}) => asteroidArray.length == 0) // only runs when asteroid array is empty
-    .subscribe((e) => {
+    .subscribe(({}) => {
 
       // create interval for respawning
       Observable.interval(10)
@@ -269,15 +271,15 @@ function asteroids() {
 
         // push asteroid into array
         arrayOfAsteroids.push(asteroid)
-      }).subscribe(() => console.log
-    )})
+
+      }).subscribe(_ => {})})
 
 /* 
 LOGIC TO SPLIT THE ASTEROIDS
 This splits the asteroids into 2. It checks a splitCounter, which is the attribute on the asteroid. 
 If splitCounter is not 0, then it can still split, otherwise, it should just be destroyed.
 */
-  function splitAsteroid(asteroid, asteroidX: number, asteroidY: number, asteroidRadius: number, asteroidSplitCounter: number) {
+  function splitAsteroid(asteroid: Elem, asteroidX: number, asteroidY: number, asteroidRadius: number, asteroidSplitCounter: number) {
 
     // if split counter not equal to 0, then split it into 2 asteroids (with an offset for x and y coordinates)
     if (asteroid.attr("splitCounter") != 0) {
@@ -337,7 +339,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
           arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
         })
     })
-  }).subscribe(() => console.log)
+  }).subscribe(_ => {})
 
   /*
   LOGIC THAT WRAPS THE SHIP

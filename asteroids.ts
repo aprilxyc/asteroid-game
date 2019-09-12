@@ -237,7 +237,6 @@ function asteroids() {
     .filter(({asteroidArray}) => asteroidArray.length == 0)
     .takeUntil(Observable.interval(15).filter(i => i == 8)) // this part taken from Harsil's code
     .subscribe((e) => {
-
       // create random starting points
       let asteroidRandomX = getRandomInt(0, 600)
       let asteroidRandomY = getRandomInt(0, 600)
@@ -253,7 +252,6 @@ function asteroids() {
         .attr("directionY", getRandomInt(-1, 1))
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
-  
     })
 
   function splitAsteroid(asteroid, asteroidX: number, asteroidY: number, asteroidRadius: number, asteroidSplitCounter: number) {
@@ -300,7 +298,6 @@ function asteroids() {
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
 
           // increase score by 10 for each collision
-          // Observable.interval(15).scan
           myScore += 10
           updateHTMLElements(myScore, lives, bomb)
 

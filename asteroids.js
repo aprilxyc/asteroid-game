@@ -136,9 +136,10 @@ function asteroids() {
     mainAsteroidsObservable
         .filter(({ asteroidArray }) => asteroidArray.length == 0)
         .subscribe((e) => {
-        Observable.interval(15)
-            .takeUntil(Observable.interval(200))
+        Observable.interval(10)
+            .takeUntil(Observable.interval(15))
             .map(() => {
+            console.log("hello");
             const asteroid = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
                 .attr("cx", getRandomInt(0, 600))
@@ -148,7 +149,7 @@ function asteroids() {
                 .attr("directionX", getRandomInt(-1, 1))
                 .attr("directionY", getRandomInt(-1, 1));
             arrayOfAsteroids.push(asteroid);
-        });
+        }).subscribe(() => console.log("hello"));
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {

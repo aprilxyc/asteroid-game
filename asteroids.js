@@ -19,6 +19,7 @@ function asteroids() {
     const ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 0,15 15,20 0, -20")
         .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2");
+    let polygonTag = document.querySelector("polygon"), polygonBBox = polygonTag.getBBox();
     const keydown$ = Observable.fromEvent(document, 'keydown').map(({ keyCode, key, repeat }) => ({
         asteroidArray: arrayOfAsteroids,
         keyCode,
@@ -93,9 +94,8 @@ function asteroids() {
             arrayOfBullets.splice(arrayOfBullets.indexOf(bull), 1);
         });
     });
-    function checkCollision(x1, x2, y1, y2, radius1, radius2) {
-        let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
-        return lineOfDistance <= sumOfRadii;
+    function checkBulletCollision(x1, x2, y1, y2, radius1, radius2) {
+        return Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))) <= (radius1 + radius2);
     }
     function checkShipCollision(x1, x2, y1, y2, radius1, radius2, shipTransformX, shipTransformY, shipRotation) {
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
@@ -118,7 +118,7 @@ function asteroids() {
         });
     });
     mainAsteroidsObservable
-        .takeUntil(asteroidObservable.filter(i => i == 8))
+        .takeUntil(asteroidObservable.filter(timer => timer == 8))
         .subscribe((e) => {
         let asteroidRandomX = getRandomInt(0, 600);
         let asteroidRandomY = getRandomInt(0, 600);
@@ -139,7 +139,6 @@ function asteroids() {
         Observable.interval(10)
             .takeUntil(Observable.interval(15))
             .map(() => {
-            console.log("hello");
             const asteroid = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
                 .attr("cx", getRandomInt(0, 600))
@@ -149,7 +148,7 @@ function asteroids() {
                 .attr("directionX", getRandomInt(-1, 1))
                 .attr("directionY", getRandomInt(-1, 1));
             arrayOfAsteroids.push(asteroid);
-        }).subscribe(() => console.log("hello"));
+        }).subscribe(() => console.log);
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {
@@ -175,7 +174,7 @@ function asteroids() {
     }
     mainAsteroidsObservable.map(({ bulletArray, asteroidArray, shipTransformX, shipTransformY, shipRotation }) => {
         asteroidArray.forEach((asteroid) => {
-            bulletArray.filter((bullet) => (checkCollision(Number(asteroid.attr("cx")), Number(bullet.attr("cx")), Number(asteroid.attr("cy")), Number(bullet.attr("cy")), Number(bullet.attr("r")), Number(asteroid.attr("r")), shipTransformX, shipTransformY, shipRotation)))
+            bulletArray.filter((bullet) => (checkBulletCollision(Number(asteroid.attr("cx")), Number(bullet.attr("cx")), Number(asteroid.attr("cy")), Number(bullet.attr("cy")), Number(bullet.attr("r")), Number(asteroid.attr("r")), shipTransformX, shipTransformY, shipRotation)))
                 .forEach((bullet) => {
                 bullet.elem.remove();
                 arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
@@ -228,7 +227,6 @@ function asteroids() {
         .map((asteroid) => asteroid.attr("cx", 600))).subscribe(() => console.log);
     asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
         .map((asteroid) => asteroid.attr("cy", 600))).subscribe(() => console.log);
-    let polygonTag = document.querySelector("polygon"), polygonBBox = polygonTag.getBBox();
     mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
         return ({
             asteroidArray: asteroidArray,
@@ -238,16 +236,7 @@ function asteroids() {
     }).forEach(({ asteroidArray, shipTransformX, shipTransformY, shipRotation }) => asteroidArray.filter((asteroid) => checkShipCollision(Number(shipTransformX), Number(asteroid.attr("cx")), Number(shipTransformY), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(polygonBBox.width - 15), shipTransformX, shipTransformY, shipRotation)).map((e) => {
         return lives;
     }).filter((lives) => (lives == 0)).map(() => {
-        gameComplete = true;
-        ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
-        let label = new Elem(svg, 'text')
-            .attr('x', 150)
-            .attr('y', 300)
-            .attr('fill', '#1772a4')
-            .attr('font-family', "Courier New")
-            .attr('font-size', 50)
-            .attr("id", "gameOver");
-        document.getElementById("gameOver").innerHTML = "GAME OVER";
+        showGameOver();
     })).subscribe(() => console.log);
     function removeCircleCanvas() {
         Array.prototype.slice.call(document.getElementsByTagName("circle")).forEach(function (item) {
@@ -291,6 +280,18 @@ function asteroids() {
         document.getElementById("score").innerHTML = "Score: " + score;
         document.getElementById("lives").innerHTML = "Lives: " + lives;
         document.getElementById("bomb").innerHTML = "Bomb: " + bomb;
+    }
+    function showGameOver() {
+        gameComplete = true;
+        ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
+        let label = new Elem(svg, 'text')
+            .attr('x', 150)
+            .attr('y', 300)
+            .attr('fill', '#1772a4')
+            .attr('font-family', "Courier New")
+            .attr('font-size', 50)
+            .attr("id", "gameOver");
+        document.getElementById("gameOver").innerHTML = "GAME OVER";
     }
 }
 if (typeof window != 'undefined')

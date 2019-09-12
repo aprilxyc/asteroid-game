@@ -412,22 +412,22 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   // going out of right screen
   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
     .map((asteroid) => asteroid.attr("cx", 0))
-  ).subscribe(() => console.log)
+  ).subscribe(_ => {})
 
   // // going out of top screen
   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
     .map((asteroid) => asteroid.attr("cy", 0))
-  ).subscribe(() => console.log)
+  ).subscribe(() => {})
 
   // // going out of left screen
   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
     .map((asteroid) => asteroid.attr("cx", 600))
-  ).subscribe(() => console.log)
+  ).subscribe(() => {})
 
   // // going out of bottom screen
   asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
     .map((asteroid) => asteroid.attr("cy", 600))
-  ).subscribe(() => console.log)
+  ).subscribe(() => {})
 
   /*
   LOGIC FOR SPACESHIP COLLIDING WITH ASTEROID

@@ -218,13 +218,13 @@ function asteroids() {
         return asteroidArray;
     });
     asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
-        .map((asteroid) => asteroid.attr("cx", 0))).subscribe(() => console.log);
+        .map((asteroid) => asteroid.attr("cx", 0))).subscribe(_ => { });
     asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
-        .map((asteroid) => asteroid.attr("cy", 0))).subscribe(() => console.log);
+        .map((asteroid) => asteroid.attr("cy", 0))).subscribe(() => { });
     asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
-        .map((asteroid) => asteroid.attr("cx", 600))).subscribe(() => console.log);
+        .map((asteroid) => asteroid.attr("cx", 600))).subscribe(() => { });
     asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
-        .map((asteroid) => asteroid.attr("cy", 600))).subscribe(() => console.log);
+        .map((asteroid) => asteroid.attr("cy", 600))).subscribe(() => { });
     mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
         return ({
             asteroidArray: asteroidArray,

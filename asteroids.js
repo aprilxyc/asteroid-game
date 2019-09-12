@@ -2,7 +2,6 @@
 function asteroids() {
     let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, bomb = 3, shipColourArray = [];
     let gameComplete = false;
-    let collided = false;
     const mainTimer = Observable.interval(5);
     const asteroidObservable = Observable.interval(1);
     const mainAsteroidsObservable = mainTimer
@@ -130,19 +129,17 @@ function asteroids() {
             .attr("r", 50)
             .attr("splitCounter", 3)
             .attr("directionX", getRandomInt(-1, 1))
-            .attr("directionY", getRandomInt(-1, 1));
+            .attr("directionY", getRandomInt(-1, 1))
+            .attr("id", "circleShape");
         arrayOfAsteroids.push(asteroid);
     });
     mainAsteroidsObservable
         .filter(({ asteroidArray }) => asteroidArray.length == 0)
-        .takeUntil(Observable.interval(15).filter(i => i == 8))
         .subscribe((e) => {
-        let asteroidRandomX = getRandomInt(0, 600);
-        let asteroidRandomY = getRandomInt(0, 600);
         let asteroid = new Elem(svg, "circle")
             .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-            .attr("cx", asteroidRandomX)
-            .attr("cy", asteroidRandomY)
+            .attr("cx", getRandomInt(0, 600))
+            .attr("cy", getRandomInt(0, 600))
             .attr("r", 50)
             .attr("splitCounter", 3)
             .attr("directionX", getRandomInt(-1, 1))
@@ -239,6 +236,11 @@ function asteroids() {
         gameComplete = true;
         ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     })).subscribe(() => console.log);
+    function removeCircleCanvas() {
+        Array.prototype.slice.call(document.getElementsByTagName("circle")).forEach(function (item) {
+            item.remove();
+        });
+    }
     keydown$.map(({ keyCode, repeat }) => {
         return ({
             keyCode,
@@ -248,15 +250,11 @@ function asteroids() {
     }).filter(({ keyCode, repeat }) => (keyCode == 80 && repeat == false && bomb != 0))
         .map(() => {
         return (arrayOfAsteroids);
-    }).map((arrayOfAsteroids) => {
-        return (arrayOfAsteroids.forEach((asteroid) => {
-            arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
-            asteroid.elem.remove();
-        }));
-    }).subscribe(() => {
-        bomb--;
-        updateHTMLElements(myScore, lives, bomb);
-    });
+    })
+        .forEach((arrayOfAsteroids) => {
+        arrayOfAsteroids.splice(0, arrayOfAsteroids.length);
+        removeCircleCanvas();
+    }).subscribe((arrayOfAsteroids) => console.log(arrayOfAsteroids));
     function updateHTMLElements(score, lives, bomb) {
         document.getElementById("score").innerHTML = "Score: " + score;
         document.getElementById("lives").innerHTML = "Lives: " + lives;

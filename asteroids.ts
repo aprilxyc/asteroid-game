@@ -30,10 +30,8 @@ function asteroids() {
                  bomb                     = 3,
                  shipColourArray          = []
 
-  let gameComplete = false
-  let collided     = false
-
-  const mainTimer = Observable.interval(5)
+  let   gameComplete = false
+  const mainTimer    = Observable.interval(5)
 
   const asteroidObservable = Observable.interval(1)
 
@@ -55,7 +53,6 @@ function asteroids() {
   // to animate the spaceship you will update the transform property
   const g = new Elem(svg, 'g')
     .attr("transform", "translate(300 300) rotate(170)")
-
 
   // create a polygon shape for the space ship as a child of the transform group 
   const ship = new Elem(svg, 'polygon', g.elem)
@@ -223,23 +220,20 @@ function asteroids() {
         .attr("splitCounter", 3)
         .attr("directionX", getRandomInt(-1, 1))
         .attr("directionY", getRandomInt(-1, 1))
+        .attr("id", "circleShape")
       // push asteroid into array
       arrayOfAsteroids.push(asteroid)
     })
 
     mainAsteroidsObservable
     .filter(({asteroidArray}) => asteroidArray.length == 0)
-    .takeUntil(Observable.interval(15).filter(i => i == 8)) // this part taken from Harsil's code
     .subscribe((e) => {
-      // create random starting points
-      let asteroidRandomX = getRandomInt(0, 600)
-      let asteroidRandomY = getRandomInt(0, 600)
 
       // create asteriod svg
       let asteroid = new Elem(svg, "circle")
         .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
-        .attr("cx", asteroidRandomX) // follow where the arrow is
-        .attr("cy", asteroidRandomY)
+        .attr("cx", getRandomInt(0, 600)) // follow where the arrow is
+        .attr("cy", getRandomInt(0, 600))
         .attr("r", 50)
         .attr("splitCounter", 3)
         .attr("directionX", getRandomInt(-1, 1))
@@ -297,7 +291,7 @@ function asteroids() {
 
           // create new asteroids here - split here
           splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")))
-          // console.log("myasteroid array:" + arrayOfAsteroids)
+          
           asteroid.elem.remove()
           arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
         })
@@ -406,6 +400,16 @@ function asteroids() {
   })
   ).subscribe(() => console.log)
 
+  // removes all circles using HTML. getElementsByTagName returns a NodeList that needs to be
+  // converted into an array first
+  //https://stackoverflow.com/questions/20044252/remove-all-the-dom-elements-with-a-specific-tag-name-in-javascript
+  function removeCircleCanvas() {
+    Array.prototype.slice.call(document.getElementsByTagName("circle")).forEach(
+      function(item) {
+        item.remove();
+        // or item.parentNode.removeChild(item); for older browsers (Edge-)
+    });
+  }
 
 /*  LOGIC FOR USING BOMB POWERUP */
   keydown$.map(({ keyCode, repeat }) => {
@@ -419,18 +423,13 @@ function asteroids() {
       return (
         arrayOfAsteroids
       )     
-    }).map((arrayOfAsteroids) => {
-      return (
-        arrayOfAsteroids.forEach((asteroid) => {
-          arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
-          asteroid.elem.remove()
-        })
-      )}).subscribe(() => {
-        bomb--
-        updateHTMLElements(myScore, lives, bomb)
-      })
+    })
+    .forEach((arrayOfAsteroids) =>  {
+      arrayOfAsteroids.splice(0, arrayOfAsteroids.length)
+      removeCircleCanvas()
+    }).subscribe((arrayOfAsteroids) => console.log(arrayOfAsteroids))
 
-  // impure function to update the score
+  // impure function to update the score, lives and bomb
   function updateHTMLElements(score: number, lives: number, bomb: number) {
     document.getElementById("score")!.innerHTML = "Score: " + score
     document.getElementById("lives")!.innerHTML = "Lives: " + lives
@@ -438,7 +437,6 @@ function asteroids() {
   }
 
 }
-
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.
 if (typeof window != 'undefined')

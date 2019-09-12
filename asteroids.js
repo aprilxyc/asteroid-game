@@ -25,8 +25,7 @@ function asteroids() {
         keyCode,
         key,
         repeat
-    }));
-    const keyup$ = Observable.fromEvent(document, 'keyup');
+    })), keyup$ = Observable.fromEvent(document, 'keyup');
     keydown$.map(({ key }) => {
         return ({
             key,
@@ -256,9 +255,8 @@ function asteroids() {
         }));
     }).subscribe(() => {
         bomb--;
-        console.log(bomb);
+        updateHTMLElements(myScore, lives, bomb);
     });
-    keydown$.subscribe((e) => console.log(e));
     function updateHTMLElements(score, lives, bomb) {
         document.getElementById("score").innerHTML = "Score: " + score;
         document.getElementById("lives").innerHTML = "Lives: " + lives;

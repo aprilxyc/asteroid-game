@@ -68,8 +68,8 @@ function asteroids() {
     keyCode,
     key,
     repeat
-  }));
-  const keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
+  })),
+  keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
 
   /* LOGIC FOR KEY MOVEMENT  */
 
@@ -427,10 +427,8 @@ function asteroids() {
         })
       )}).subscribe(() => {
         bomb--
-        console.log(bomb)
+        updateHTMLElements(myScore, lives, bomb)
       })
-
-  keydown$.subscribe((e) => console.log(e))
 
   // impure function to update the score
   function updateHTMLElements(score: number, lives: number, bomb: number) {

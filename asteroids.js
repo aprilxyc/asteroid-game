@@ -1,7 +1,8 @@
 "use strict";
 function asteroids() {
-    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, powerUp = 3;
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, bomb = 3, shipColourArray = [];
     let gameComplete = false;
+    let collided = false;
     const mainTimer = Observable.interval(5);
     const asteroidObservable = Observable.interval(1);
     const mainAsteroidsObservable = mainTimer
@@ -85,7 +86,8 @@ function asteroids() {
         arrayOfBullets.push(bulletShot);
     });
     mainAsteroidsObservable.subscribe(({ bulletArray }) => {
-        bulletArray.map((bullet) => bullet.attr("cx", parseFloat(bullet.attr("cx")) + parseFloat(bullet.attr("bulletDistanceX")))
+        bulletArray
+            .map((bullet) => bullet.attr("cx", parseFloat(bullet.attr("cx")) + parseFloat(bullet.attr("bulletDistanceX")))
             .attr("cy", parseFloat(bullet.attr("cy")) + parseFloat(bullet.attr("bulletDistanceY"))))
             .filter((bull) => (parseFloat(bull.attr("cx")) >= 600) || parseFloat(bull.attr("cy")) >= 600 || parseFloat(bull.attr("cy")) <= 0 || parseFloat(bull.attr("cx")) <= 0)
             .forEach((bull) => {
@@ -96,6 +98,16 @@ function asteroids() {
     function checkCollision(x1, x2, y1, y2, radius1, radius2) {
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
         return lineOfDistance <= sumOfRadii;
+    }
+    function checkShipCollision(x1, x2, y1, y2, radius1, radius2, shipTransformX, shipTransformY, shipRotation) {
+        let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), sumOfRadii = (radius1 + radius2);
+        if (lineOfDistance <= sumOfRadii) {
+            g.attr("transform", `translate(300 300) rotate(300)`);
+            --lives;
+            updateHTMLElements(myScore, lives, bomb);
+            return true;
+        }
+        return false;
     }
     function getRandomInt(min, max) {
         return (Math.random() + min) * Math.floor(max);
@@ -126,7 +138,6 @@ function asteroids() {
         .filter(({ asteroidArray }) => asteroidArray.length == 0)
         .takeUntil(Observable.interval(15).filter(i => i == 8))
         .subscribe((e) => {
-        console.log("true");
         let asteroidRandomX = getRandomInt(0, 600);
         let asteroidRandomY = getRandomInt(0, 600);
         let asteroid = new Elem(svg, "circle")
@@ -161,14 +172,14 @@ function asteroids() {
             arrayOfAsteroids.push(asteroid2);
         }
     }
-    mainAsteroidsObservable.map(({ bulletArray, asteroidArray }) => {
+    mainAsteroidsObservable.map(({ bulletArray, asteroidArray, shipTransformX, shipTransformY, shipRotation }) => {
         asteroidArray.forEach((asteroid) => {
-            bulletArray.filter((bullet) => (checkCollision(parseFloat(asteroid.attr("cx")), parseFloat(bullet.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(bullet.attr("cy")), parseFloat(bullet.attr("r")), parseFloat(asteroid.attr("r")))))
+            bulletArray.filter((bullet) => (checkCollision(Number(asteroid.attr("cx")), Number(bullet.attr("cx")), Number(asteroid.attr("cy")), Number(bullet.attr("cy")), Number(bullet.attr("r")), Number(asteroid.attr("r")), shipTransformX, shipTransformY, shipRotation)))
                 .forEach((bullet) => {
                 bullet.elem.remove();
                 arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
                 myScore += 10;
-                updateScore(myScore);
+                updateHTMLElements(myScore, lives, bomb);
                 splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")));
                 asteroid.elem.remove();
                 arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1);
@@ -223,9 +234,7 @@ function asteroids() {
             shipTransformX: shipTransformX,
             shipTransformY: shipTransformY
         });
-    }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) => checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))).map((e) => {
-        lives--;
-        console.log(lives);
+    }).forEach(({ asteroidArray, shipTransformX, shipTransformY, shipRotation }) => asteroidArray.filter((asteroid) => checkShipCollision(Number(shipTransformX), Number(asteroid.attr("cx")), Number(shipTransformY), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(polygonBBox.width - 15), shipTransformX, shipTransformY, shipRotation)).map((e) => {
         return lives;
     }).filter((lives) => (lives == 0)).map(() => {
         gameComplete = true;
@@ -248,12 +257,14 @@ function asteroids() {
             asteroid.elem.remove();
         }));
     }).subscribe(() => {
-        powerUp--;
-        console.log(powerUp);
+        bomb--;
+        console.log(bomb);
     });
     keydown$.subscribe((e) => console.log(e));
-    function updateScore(score) {
+    function updateHTMLElements(score, lives, bomb) {
         document.getElementById("score").innerHTML = "Score: " + score;
+        document.getElementById("lives").innerHTML = "Lives: " + lives;
+        document.getElementById("bomb").innerHTML = "Bomb: " + bomb;
     }
 }
 if (typeof window != 'undefined')

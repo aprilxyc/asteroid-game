@@ -1,7 +1,7 @@
 interface Observer<Input> {
-  next    (value: Input): void;
-  complete()            : void;
-           unsub?       : () => void;
+  next     (value: Input): void;
+  complete()             : void;
+           unsub?        : () => void;
 }
 
 /**
@@ -215,8 +215,8 @@ class Observable<Input> {
 // initSequence test for the ship movement
 
 interface LazySequence<T> {
-       value: T;
-  next()    : LazySequence<T>;
+                 value: T;
+            next()    : LazySequence<T>;
 }
 
 function initSequence<T>(transform: (value: T) => T): (initialValue: T) => LazySequence<T> {

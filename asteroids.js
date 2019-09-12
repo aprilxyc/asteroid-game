@@ -19,10 +19,11 @@ function asteroids() {
     const ship = new Elem(svg, 'polygon', g.elem)
         .attr("points", "-15,20 0,15 15,20 0, -20")
         .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2");
-    const keydown$ = Observable.fromEvent(document, 'keydown').map(({ keyCode, key }) => ({
+    const keydown$ = Observable.fromEvent(document, 'keydown').map(({ keyCode, key, repeat }) => ({
         asteroidArray: arrayOfAsteroids,
         keyCode,
-        key
+        key,
+        repeat
     }));
     const keyup$ = Observable.fromEvent(document, 'keyup');
     keydown$.map(({ key }) => {
@@ -121,6 +122,23 @@ function asteroids() {
             .attr("directionY", getRandomInt(-1, 1));
         arrayOfAsteroids.push(asteroid);
     });
+    mainAsteroidsObservable
+        .filter(({ asteroidArray }) => asteroidArray.length == 0)
+        .takeUntil(Observable.interval(15).filter(i => i == 8))
+        .subscribe((e) => {
+        console.log("true");
+        let asteroidRandomX = getRandomInt(0, 600);
+        let asteroidRandomY = getRandomInt(0, 600);
+        let asteroid = new Elem(svg, "circle")
+            .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
+            .attr("cx", asteroidRandomX)
+            .attr("cy", asteroidRandomY)
+            .attr("r", 50)
+            .attr("splitCounter", 3)
+            .attr("directionX", getRandomInt(-1, 1))
+            .attr("directionY", getRandomInt(-1, 1));
+        arrayOfAsteroids.push(asteroid);
+    });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {
             let asteroid1 = new Elem(svg, "circle")
@@ -206,18 +224,20 @@ function asteroids() {
             shipTransformY: shipTransformY
         });
     }).forEach(({ asteroidArray, shipTransformX, shipTransformY }) => asteroidArray.filter((asteroid) => checkCollision(parseFloat(shipTransformX), parseFloat(asteroid.attr("cx")), parseFloat(shipTransformY), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(polygonBBox.width - 15))).map((e) => {
-        updateLives();
-        ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
+        lives--;
+        console.log(lives);
         return lives;
-    }).filter((lives) => lives == 0).map(() => {
+    }).filter((lives) => (lives == 0)).map(() => {
         gameComplete = true;
+        ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     })).subscribe(() => console.log);
-    keydown$.map(({ keyCode }) => {
+    keydown$.map(({ keyCode, repeat }) => {
         return ({
             keyCode,
-            spaceship: g
+            spaceship: g,
+            repeat
         });
-    }).filter(({ keyCode }) => (keyCode == 80))
+    }).filter(({ keyCode, repeat }) => (keyCode == 80 && repeat == false && powerUp != 0))
         .flatMap((keyCode) => (Observable.interval(15)
         .takeUntil(keyup$)))
         .map(() => {
@@ -228,18 +248,12 @@ function asteroids() {
             asteroid.elem.remove();
         }));
     }).subscribe(() => {
-        updateBombPowerup();
+        powerUp--;
+        console.log(powerUp);
     });
+    keydown$.subscribe((e) => console.log(e));
     function updateScore(score) {
         document.getElementById("score").innerHTML = "Score: " + score;
-    }
-    function updateLives() {
-        lives = lives - 1;
-        document.getElementById("lives").innerHTML = "Lives: " + lives;
-    }
-    function updateBombPowerup() {
-        powerup = powerup - 1;
-        document.getElementById("bomb").innerHTML = "Bombs: " + powerUp;
     }
 }
 if (typeof window != 'undefined')

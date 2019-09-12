@@ -246,9 +246,7 @@ function asteroids() {
             spaceship: g,
             repeat
         });
-    }).filter(({ keyCode, repeat }) => (keyCode == 80 && repeat == false && powerUp != 0))
-        .flatMap((keyCode) => (Observable.interval(15)
-        .takeUntil(keyup$)))
+    }).filter(({ keyCode, repeat }) => (keyCode == 80 && repeat == false && bomb != 0))
         .map(() => {
         return (arrayOfAsteroids);
     }).map((arrayOfAsteroids) => {

@@ -22,12 +22,6 @@ function asteroids() {
 
   // have a random booster that that shows up every 10 seconds -> gives you more points
 
-  // powerups where all the asteroids disappear from the screen 
-
-  // document.getElementByID = ("lives")
-  // lives [1,1,1] --> scan it 
-
-
   // save global variables so you can make objects reference them later - taken from Harsil's code
   let            arrayOfAsteroids: Elem[] = [],   // array of bullets
   arrayOfBullets: Elem[]                  = [],
@@ -420,11 +414,7 @@ function asteroids() {
       spaceship: g,
       repeat
     })
-  }).filter(({ keyCode, repeat}) => (keyCode == 80 && repeat == false && powerUp != 0))
-    .flatMap((keyCode) => (
-      Observable.interval(15)
-        .takeUntil(keyup$)
-    ))
+  }).filter(({ keyCode, repeat}) => (keyCode == 80 && repeat == false && bomb != 0))
     .map(() => {
       return (
         arrayOfAsteroids

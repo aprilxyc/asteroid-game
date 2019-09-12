@@ -256,8 +256,10 @@ function asteroids() {
       Observable.interval(10)
       .takeUntil(Observable.interval(15))
       .map(() => {
-        let asteroidRandomX = getRandomInt(0, 600),
-            asteroidRandomY = getRandomInt(0, 600)
+        let asteroidRandomX  = getRandomInt(0, 600),
+            asteroidRandomY  = getRandomInt(0, 600),
+            randomDirectionX = getRandomInt(-1, 1),
+            randomDirectionY = getRandomInt(-1, 1)
 
         // create asteriod svg
         const asteroid = new Elem(svg, "circle")
@@ -266,8 +268,8 @@ function asteroids() {
         .attr("cy", asteroidRandomY)
         .attr("r", 30)
         .attr("splitCounter", 3)
-        .attr("directionX", getRandomInt(-1, 1))
-        .attr("directionY", getRandomInt(-1, 1))
+        .attr("directionX",  randomDirectionX )
+        .attr("directionY", randomDirectionY)
 
         // push asteroid into array
         arrayOfAsteroids.push(asteroid)
@@ -284,7 +286,9 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
     // if split counter not equal to 0, then split it into 2 asteroids (with an offset for x and y coordinates)
     if (asteroid.attr("splitCounter") != 0) {
       let asteroidChildrenOffset = 20,
-          asteroidNewRadius      = 10
+          asteroidNewRadius      = 10,
+          randomDirectionX       = getRandomInt(-1, 1),
+          randomDirectionY       = getRandomInt(-1, 1)
 
       let asteroid1 = new Elem(svg, "circle")
         .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
@@ -292,8 +296,8 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
         .attr("cy", asteroidY + asteroidChildrenOffset)
         .attr("r", asteroidRadius - asteroidNewRadius)
         .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1) // decrement split counter so we know whether to split or not
-        .attr("directionX", getRandomInt(-1, 1))
-        .attr("directionY", getRandomInt(-1, 1))
+        .attr("directionX", randomDirectionX)
+        .attr("directionY", randomDirectionY)
 
       arrayOfAsteroids.push(asteroid1)
 
@@ -303,8 +307,8 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
         .attr("cy", asteroidY - asteroidChildrenOffset)
         .attr("r", asteroidRadius - asteroidNewRadius)
         .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
-        .attr("directionX", getRandomInt(-1, 1))
-        .attr("directionY", getRandomInt(-1, 1))
+        .attr("directionX", randomDirectionX)
+        .attr("directionY", randomDirectionY)
 
       arrayOfAsteroids.push(asteroid2)
     }
@@ -332,8 +336,9 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
           updateHTMLElements(myScore, lives, bomb)
 
           // split asteroids into new asteroids here
-          splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")))
-          
+          splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")),
+          parseFloat(asteroid.attr("splitCounter")))
+      
           // remove asteroids from the array and remove the canvas element
           asteroid.elem.remove()
           arrayOfAsteroids.splice(arrayOfAsteroids.indexOf(asteroid), 1)
@@ -346,7 +351,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   This ensures that if the ship goes offscreen, then it wraps to the other side of the screen. 
   */
   const shipWrappingState = mainAsteroidsObservable
-    .map(({ ship, shipTransformX, shipTransformY, shipRotation }) =>
+    .map(({ ship, shipTransformX, shipTransformY, shipRotation }) => // use this to access ship x, y and rotation
       ({
         shipTransformX,
         shipTransformY,
@@ -440,12 +445,13 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
     })
   }).forEach(({ asteroidArray, shipTransformX, shipTransformY, shipRotation }) => asteroidArray.filter((asteroid) =>
     checkShipCollision(Number(shipTransformX), Number(asteroid.attr("cx")), Number(shipTransformY), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(polygonBBox.width - 15), shipTransformX, shipTransformY, shipRotation)
-  ).map((e) => {
-    return lives
-  }).filter((lives) => (lives == 0)).map(() => {
-    showGameOver()
+  ).map(({}) => {
+    return lives // retturn lives so we can check it
+  }).filter((lives) => (lives == 0))
+    .map(() => {
+      showGameOver()
   })
-  ).subscribe(() => console.log)
+  ).subscribe(_ => {})
 
 
   /*
@@ -526,11 +532,11 @@ LOGIC FOR USING BOMB POWERUP
     ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
     
     // show the game over text on screen
-    let label = new Elem(svg, 'text')
+    let gameOverText = new Elem(svg, 'text')
       .attr('x', 150)
       .attr('y', 300)
-      .attr('fill', '#1772a4')
-      .attr('font-family', "Courier New")
+      .attr('fill', '#ffffff')
+      .attr('font-family', "monospace")
       .attr('font-size', 50)
       .attr("id", "gameOver")
 

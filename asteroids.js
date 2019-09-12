@@ -135,29 +135,29 @@ function asteroids() {
         Observable.interval(10)
             .takeUntil(Observable.interval(15))
             .map(() => {
-            let asteroidRandomX = getRandomInt(0, 600), asteroidRandomY = getRandomInt(0, 600);
+            let asteroidRandomX = getRandomInt(0, 600), asteroidRandomY = getRandomInt(0, 600), randomDirectionX = getRandomInt(-1, 1), randomDirectionY = getRandomInt(-1, 1);
             const asteroid = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
                 .attr("cx", asteroidRandomX)
                 .attr("cy", asteroidRandomY)
                 .attr("r", 30)
                 .attr("splitCounter", 3)
-                .attr("directionX", getRandomInt(-1, 1))
-                .attr("directionY", getRandomInt(-1, 1));
+                .attr("directionX", randomDirectionX)
+                .attr("directionY", randomDirectionY);
             arrayOfAsteroids.push(asteroid);
         }).subscribe(_ => { });
     });
     function splitAsteroid(asteroid, asteroidX, asteroidY, asteroidRadius, asteroidSplitCounter) {
         if (asteroid.attr("splitCounter") != 0) {
-            let asteroidChildrenOffset = 20, asteroidNewRadius = 10;
+            let asteroidChildrenOffset = 20, asteroidNewRadius = 10, randomDirectionX = getRandomInt(-1, 1), randomDirectionY = getRandomInt(-1, 1);
             let asteroid1 = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
                 .attr("cx", asteroidX + asteroidChildrenOffset)
                 .attr("cy", asteroidY + asteroidChildrenOffset)
                 .attr("r", asteroidRadius - asteroidNewRadius)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
-                .attr("directionX", getRandomInt(-1, 1))
-                .attr("directionY", getRandomInt(-1, 1));
+                .attr("directionX", randomDirectionX)
+                .attr("directionY", randomDirectionY);
             arrayOfAsteroids.push(asteroid1);
             let asteroid2 = new Elem(svg, "circle")
                 .attr("style", "fill:#171846;stroke:#ffffff;stroke-width:2")
@@ -165,8 +165,8 @@ function asteroids() {
                 .attr("cy", asteroidY - asteroidChildrenOffset)
                 .attr("r", asteroidRadius - asteroidNewRadius)
                 .attr("splitCounter", asteroidSplitCounter = asteroidSplitCounter - 1)
-                .attr("directionX", getRandomInt(-1, 1))
-                .attr("directionY", getRandomInt(-1, 1));
+                .attr("directionX", randomDirectionX)
+                .attr("directionY", randomDirectionY);
             arrayOfAsteroids.push(asteroid2);
         }
     }
@@ -231,11 +231,12 @@ function asteroids() {
             shipTransformX: shipTransformX,
             shipTransformY: shipTransformY
         });
-    }).forEach(({ asteroidArray, shipTransformX, shipTransformY, shipRotation }) => asteroidArray.filter((asteroid) => checkShipCollision(Number(shipTransformX), Number(asteroid.attr("cx")), Number(shipTransformY), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(polygonBBox.width - 15), shipTransformX, shipTransformY, shipRotation)).map((e) => {
+    }).forEach(({ asteroidArray, shipTransformX, shipTransformY, shipRotation }) => asteroidArray.filter((asteroid) => checkShipCollision(Number(shipTransformX), Number(asteroid.attr("cx")), Number(shipTransformY), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(polygonBBox.width - 15), shipTransformX, shipTransformY, shipRotation)).map(({}) => {
         return lives;
-    }).filter((lives) => (lives == 0)).map(() => {
+    }).filter((lives) => (lives == 0))
+        .map(() => {
         showGameOver();
-    })).subscribe(() => console.log);
+    })).subscribe(_ => { });
     function removeCircleCanvas() {
         Array.prototype.slice.call(document.getElementsByTagName("circle")).forEach(function (item) {
             item.remove();
@@ -282,11 +283,11 @@ function asteroids() {
     function showGameOver() {
         gameComplete = true;
         ship.attr("style", "fill:#FF0000;stroke:purple;stroke-width:1");
-        let label = new Elem(svg, 'text')
+        let gameOverText = new Elem(svg, 'text')
             .attr('x', 150)
             .attr('y', 300)
-            .attr('fill', '#1772a4')
-            .attr('font-family', "Courier New")
+            .attr('fill', '#ffffff')
+            .attr('font-family', "monospace")
             .attr('font-size', 50)
             .attr("id", "gameOver");
         document.getElementById("gameOver").innerHTML = "GAME OVER";

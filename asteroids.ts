@@ -21,10 +21,10 @@ function asteroids() {
   // save global variables so you can make objects reference them later - taken from Harsil's code
   let            arrayOfAsteroids: Elem[] = [],    // array of bullets
   arrayOfBullets: Elem[]                  = [],
-                 myScore                  = 0,
-                 lives                    = 3,
-                 bomb                     = 3,
-                 gameComplete             = false
+  myScore        :number                  = 0,
+  lives          :number                  = 3,
+  bomb           : number                 = 3,
+  gameComplete   : boolean                = false
 
   const mainTimer               = Observable.interval(5),
         asteroidObservable      = Observable.interval(1),
@@ -50,8 +50,9 @@ function asteroids() {
     .attr("points", "-15,20 0,15 15,20 0, -20")
     .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2")
 
-    let polygonTag  = document.querySelector("polygon"),
-        polygonBBox = polygonTag!.getBBox()               // get the width or height of the polygon element g
+  // get the width / height of the polygon element g
+  let polygonTag  = document.querySelector("polygon"),
+      polygonBBox = polygonTag!.getBBox()
 
   // creates new observable that emits an event object everytime a keydown is fired
   const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode, key, repeat}) => ({
@@ -62,7 +63,9 @@ function asteroids() {
   })),
   keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
 
-  /* LOGIC FOR KEY MOVEMENT  */
+  /* 
+  LOGIC FOR KEY MOVEMENT 
+  */
 
   // moving ship to the right
   keydown$.map(({ key }) => {
@@ -147,7 +150,9 @@ function asteroids() {
 
     })
 
-  /* LOGIC FOR REMOVING BULLETS THAT ARE OFFSCREEN FROM ARRAY */
+  /*
+  LOGIC FOR REMOVING BULLETS THAT ARE OFFSCREEN FROM ARRAY
+  */
   mainAsteroidsObservable.subscribe(({ bulletArray }) => {
     bulletArray
       .map((bullet) => bullet.attr("cx", parseFloat(bullet.attr("cx")) + parseFloat(bullet.attr("bulletDistanceX")))
@@ -265,7 +270,7 @@ function asteroids() {
         // push asteroid into array
         arrayOfAsteroids.push(asteroid)
       }).subscribe(() => console.log
-    })
+    )})
 
 /* 
 LOGIC TO SPLIT THE ASTEROIDS
@@ -447,7 +452,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   function. It uses getElementsByTagName to grab the circle element, return a NodeList that is then converted
   into an array. This is then removed from the HTML.
 
-  Code inispired by: 
+  Code iinspired by: 
        https       :   //stackoverflow.com/questions/20044252/remove-all-the-dom-elements-with-a-specific-tag-name-in-javascript
   */
   function removeCircleCanvas() {

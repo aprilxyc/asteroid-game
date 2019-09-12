@@ -451,7 +451,10 @@ function asteroids() {
 
       
 
-    }).subscribe((arrayOfAsteroids) => console.log(arrayOfAsteroids))
+    }).subscribe((arrayOfAsteroids) => {
+      bomb--
+      updateHTMLElements(myScore, lives, bomb)
+      console.log(arrayOfAsteroids)})
 
 
   // impure function to update the score, lives and bomb

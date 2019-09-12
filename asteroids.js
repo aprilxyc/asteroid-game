@@ -270,7 +270,11 @@ function asteroids() {
                 .attr("cy", 300)
                 .attr("r", 50);
         }).subscribe(_ => console.log);
-    }).subscribe((arrayOfAsteroids) => console.log(arrayOfAsteroids));
+    }).subscribe((arrayOfAsteroids) => {
+        bomb--;
+        updateHTMLElements(myScore, lives, bomb);
+        console.log(arrayOfAsteroids);
+    });
     function updateHTMLElements(score, lives, bomb) {
         document.getElementById("score").innerHTML = "Score: " + score;
         document.getElementById("lives").innerHTML = "Lives: " + lives;

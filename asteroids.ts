@@ -15,6 +15,8 @@ function asteroids() {
 
   // TODO: add information about why I did it this way and inspiration from the tutorials
 
+  // April Yu En Chii 26951460
+
   /* 
   QUICK OVERVIEW                                                                                         : 
   -     Basis of the assignment code was inspired by the example game Tim Dwyer posted onto Moodle forums: 
@@ -459,7 +461,8 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   */
 
   // save the state here so we can do multiple filters for different parts of the screen
-  // this was inspired by the mousePosObsevable function that was seen in basicexamples.ts
+  // this was inspired by the mousePosObsevable function that was seen in observableexamples.ts
+  // in tutorial 4
 
   function shipWrappingObservable() {
     const shipWrappingState = mainAsteroidsObservable
@@ -693,6 +696,7 @@ function bombPowerupObservable() {
     document.getElementById("showScore")!.innerHTML = "YOUR SCORE: " + myScore[0]
   }
 
+  // the observables made have been placed into functions as seen from our tutorial's observableexamples.ts
   shipPosObservable(); // moves the ship
   bulletMovementObservable(); // shoots bullets
   asteroidMovementObservable(); // moves asteroids

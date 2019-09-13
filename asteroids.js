@@ -279,7 +279,6 @@ function asteroids() {
         keydown$.map(({ keyCode, repeat }) => {
             return ({
                 keyCode,
-                spaceship: g,
                 repeat
             });
         }).filter(({ keyCode, repeat }) => (keyCode == 80 && repeat == false && bomb != 0))

@@ -604,6 +604,8 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
 
 /* 
 LOGIC FOR USING BOMB POWERUP
+Use this bomb feature to clear the asteroids and then replace it with new smaller asteroids 
+by pressing the 'P' key.
 */
 
 function bombPowerupObservable() {
@@ -611,7 +613,6 @@ function bombPowerupObservable() {
   keydown$.map(({ keyCode, repeat }) => {
     return ({
       keyCode,
-      spaceship: g,
       repeat
     })
   }).filter(({ keyCode, repeat}) => (keyCode == 80 && repeat == false && bomb != 0)) // if this is first time key is pressed and there are still bombs left

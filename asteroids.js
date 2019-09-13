@@ -29,7 +29,7 @@ function asteroids() {
             return ({
                 key
             });
-        }).filter(({ key, keyCode }) => (key == "ArrowRight" || keyCode == 68))
+        }).filter(({ key }) => (key == "ArrowRight"))
             .flatMap((key) => (Observable.interval(15)
             .takeUntil(keyup$)))
             .subscribe(_ => {
@@ -37,12 +37,11 @@ function asteroids() {
             g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation + 10})`);
         });
         keydown$
-            .map(({ key, keyCode }) => {
+            .map(({ key }) => {
             return ({
-                key,
-                spaceship: g
+                key
             });
-        }).filter(({ key, keyCode }) => (key == "ArrowLeft" || keyCode == 65))
+        }).filter(({ key }) => (key == "ArrowLeft"))
             .flatMap((key) => (Observable.interval(15)
             .takeUntil(keyup$)))
             .subscribe(_ => {
@@ -72,13 +71,13 @@ function asteroids() {
             g.attr("transform", `translate(${transformX = transformX + newX} ${transformY = transformY + newY}) rotate(${shipRotation})`);
         });
         keydown$
-            .map(({ key, keyCode }) => ({
+            .map(({ key }) => ({
             key,
             transformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
             transformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
             shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle),
         }))
-            .filter(({ key, keyCode }) => (key == " "))
+            .filter(({ key }) => (key == " "))
             .subscribe(({ transformX, transformY, shipRotation }) => {
             const rotationRadians = shipRotation * (Math.PI / 180), bullCalculateX = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 1, bullCalculateY = Math.sin(rotationRadians - (90 * (Math.PI / 180))) * 1;
             let bulletShot = new Elem(svg, 'circle')
@@ -232,7 +231,7 @@ function asteroids() {
             .filter(({ shipTransformY }) => (shipTransformY >= 600))
             .subscribe(() => {
             let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
-            g.attr("transform", `translate(${transformX} ${transformY = 0}) rotate(${shipRotation})`);
+            g.attr("transform", `translate(${transformX} ${transformY = 10}) rotate(${shipRotation})`);
         });
         shipWrappingState
             .filter(({ shipTransformY }) => (shipTransformY <= 0))
@@ -245,13 +244,17 @@ function asteroids() {
         let asteroidWrappingState = mainAsteroidsObservable.map(({ asteroidArray }) => {
             return asteroidArray;
         });
-        asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
+        asteroidWrappingState.forEach((asteroid) => asteroid
+            .filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
             .map((asteroid) => asteroid.attr("cx", 0))).subscribe(_ => { });
-        asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
+        asteroidWrappingState.forEach((asteroid) => asteroid
+            .filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
             .map((asteroid) => asteroid.attr("cy", 0))).subscribe(() => { });
-        asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
+        asteroidWrappingState.forEach((asteroid) => asteroid.
+            filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
             .map((asteroid) => asteroid.attr("cx", 600))).subscribe(() => { });
-        asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
+        asteroidWrappingState.forEach((asteroid) => asteroid
+            .filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
             .map((asteroid) => asteroid.attr("cy", 600))).subscribe(() => { });
     }
     function shipCollidingAsteroidObservable() {

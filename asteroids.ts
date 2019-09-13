@@ -1,4 +1,8 @@
 // FIT2102 2019 Assignment 1
+// Name: April Yu En Chi 
+// Student Number: 26951460
+// Tutorial: Wednesday 8am
+// Tutor: Alina Bhari & Jason Nguyen
 // https://docs.google.com/document/d/1Gr-M6LTU-tfm4yabqZWJYg-zTjEVqHKKTCvePGCYsUA/edit?usp=sharing
 
 function asteroids() {
@@ -12,8 +16,6 @@ function asteroids() {
   // Document your code!  
   // Explain which ideas you have used ideas from the lectures to 
   // create reusable, generic functions.
-
-  // TODO: add information about why I did it this way and inspiration from the tutorials
 
   // April Yu En Chii 26951460
 
@@ -29,32 +31,41 @@ function asteroids() {
   EXTRA FEATURES ADDED: 
   - Score that increments when you shoot asteroids - each asteroid is worth 1 point.
   - Lives that decrement when your ship hits an asteroid - you have 3 lives.
-  - bomb feature that clears your screen for a moment and replaces asteroids with smaller asteroids (used when you are overwhelmed by asteroids).
-    This bomb feature can be used 3 times.
-    - Thrust when ship moves forward
+  - Bomb feature that clears your screen for a moment and replaces asteroids with smaller asteroids (used when you are overwhelmed by asteroids).
+    This bomb feature can be used up to 3 times.
+  - Thrust when ship moves forward
+
+  This game largely uses the mainAsteroidObservable as the main game observable that ticks through the game and checks
+  constanly for changes. It stops when the game is complete, thereby ending the game. Note that throughout the code,
+  I have stated where the code has been impure. Any impurities have been limited to just the subscribes (limiting the side effects).
+
+  If this game were to be more pure, the bullet and asteroid arrays would need to be states and there would need to be
+  an update game state that simply updates the game all at once. 
+
+  Note that the observables have been placed into functions. This was inspired by observableexamples.ts.
   */
 
-
-  // save global variables so you can make objects reference them later 
+  // save global variables so you can make objects and reference them later in observables
   let            arrayOfAsteroids: Elem[] = [],      // array of asteroids
   arrayOfBullets : Elem[]                 = [],      // array of bulletts
-  myScore        : number[]               = [1,1],   // done using scan
+  myScore        : number[]               = [1,1],   // my score is incremented using scan
   lives          : number                 = 3,
   bomb           : number                 = 3,
   gameComplete   : boolean                = false
 
   // Information was saved as objects in the main game observable so we can access it without having to directly grab the global variables
   // This method was chosen because it is more pure and you are able to grab references to variables without sacrificing purity
+  // This is more pure than simply accessing it from global variables
   const mainTimer               = Observable.interval(5),   // main timer that emits observable to stop main game when game is complette
         asteroidObservable      = Observable.interval(1),   // this is used to set when to stop the spawning of the asteroids at the beginning of the game 
-        mainAsteroidsObservable = mainTimer                 // this is the main game that consatntly checks throughout the game for changes - this ensures everything in the game is on the same timeline
+        mainAsteroidsObservable = mainTimer                 // this is the main game observable that consatntly checks throughout the game for changes - this ensures everything in the game is on the same timeline
     .takeUntil(
-      mainTimer.filter(_ => gameComplete == true)
-    ).map(_ => ({
+      mainTimer.filter(_ => gameComplete == true) // end game once game complete variable is true
+    ).map(_ => ({ // save information here as objects so we can access them
       bulletArray   : arrayOfBullets,
       asteroidArray : arrayOfAsteroids,
       ship          : g,
-      shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),   // save information here as objects so we can access them
+      shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
       shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
       shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle)
     })),
@@ -71,37 +82,38 @@ function asteroids() {
   // get the width / height of the polygon element g - this is used to get the exact width of the ship SVG for collision checking
   let polygonTag  = document.querySelector("polygon"),
       polygonBBox = polygonTag!.getBBox()
-
-      const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode, key, repeat}) => ({
-        asteroidArray: arrayOfAsteroids,
-        keyCode,
-        key,
-        repeat
-      })),
-      keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
-
-  // creates new observable that emits an event object everytime a keydown is fired
-  // we define the objects in this observable that we need so we can access them below when we start
-  // defining ship movements based on keys and keycodes
-  // this method is more pure than simply grabbing global variables from outside the scope
+  
+  /* 
+  @ keydown observable
+  Creates new observable that emits an event object everytime a keydown is fired
+  we define the objects in this observable that we need so we can access them below when we start
+  defining ship movements based on keys and keycodes
+  This method is more pure than simply grabbing global variables from outside the scope
+  */
+  const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode, key, repeat}) => ({
+    asteroidArray: arrayOfAsteroids,
+    keyCode,
+    key,
+    repeat
+  })),
+  keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
 
 
   /* 
   LOGIC FOR SHIP MOVEMENT (ROTATING AND MOVING FORWARD)
-  Note: setting the attributes is an impure way of doing things as it causes side effects.
-  Attributes are set for moving the ship's coordinates. Due to their impure nature, they have been limited
+  Note: Setting the attributes is an impure way of doing things as it causes side effects.
+  The attributes are set for moving the ship's coordinates. Due to their impure nature, they have been limited
   to inside the subscribes.
   */
 
   function shipPosObservable () {
-
-    // moving ship to the right
+  // moving ship to the right
   keydown$
   .map(({ key }) => {
     return ({
       key
     })
-  }).filter(({ key, keyCode }) => (key == "ArrowRight" || keyCode == 68))
+  }).filter(({ key }) => (key == "ArrowRight"))
     .flatMap((key) => ( // flatmap it because we are creating more values than we originally had
       Observable.interval(15) // continue firing observable and rotating until key goes up
         .takeUntil(keyup$)
@@ -118,12 +130,11 @@ function asteroids() {
 
   // moving ship to the left
   keydown$
-  .map(({ key, keyCode }) => {
+  .map(({ key }) => {
     return ({
-      key,
-      spaceship: g
+      key
     })
-  }).filter(({ key, keyCode}) => (key == "ArrowLeft" || keyCode == 65)) 
+  }).filter(({ key}) => (key == "ArrowLeft")) 
     .flatMap((key) => ( // flatmap it because we are creating more values than we originally had
       Observable.interval(15) // continue firing observable and rotating until key goes up
         .takeUntil(keyup$)
@@ -153,7 +164,7 @@ function asteroids() {
       directionY: Math.sin(Math.PI * (shipRotation - 90) / 180)
     }))
     .flatMap(({ directionX, directionY }) => // this part implements the thrust
-      Observable.interval(30) // decreases the movement each time
+      Observable.interval(30) // decreases the movement each time in the interval
         .map(thrust => ({
           newX: 300 * directionX / thrust,
           newY: 300 * directionY / thrust
@@ -167,15 +178,19 @@ function asteroids() {
       g.attr("transform", `translate(${transformX = transformX + newX} ${transformY = transformY + newY}) rotate(${shipRotation})`)
     })
 
-  /*  LOGIC FOR CREATING THE BULLETS */
+  /*  
+  LOGIC FOR CREATING THE BULLETS 
+  This observable creates bullets and pushes them into an array so that the main game observable can constantly check it
+  and move it.
+  */
   keydown$
-    .map(({ key, keyCode }) => ({
+    .map(({ key }) => ({
       key,
       transformX  : Number(g.elem.transform.baseVal.getItem(0).matrix.e),
       transformY  : Number(g.elem.transform.baseVal.getItem(0).matrix.f),
       shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle),
     }))
-    .filter(({ key, keyCode}) => (key == " "))
+    .filter(({ key }) => (key == " ")) // filter it for space key
     .subscribe(({ transformX, transformY, shipRotation }) => {
       const rotationRadians = shipRotation * (Math.PI / 180),
             bullCalculateX  = Math.cos(rotationRadians - (90 * (Math.PI / 180))) * 1,   // trigonometry calculations ensure bullets shoot from tip of ship (a triangle)
@@ -190,16 +205,20 @@ function asteroids() {
         .attr("bulletDistanceX", bullCalculateX)
         .attr("bulletDistanceY", bullCalculateY)
 
-      // pushinig bullet into array is impure because it alters the array itself
+      // pushing bullet into array is impure because it alters the array itself
       arrayOfBullets.push(bulletShot)
 
     })
 
   }
-  
 
   /*
   LOGIC FOR MOVING BULLETS AND REMOVING BULLETS THAT ARE OFFSCREEN FROM ARRAY
+  This uses the main game observable to constantly check whether there are bullets in the bullet array. 
+  If there are bullets in the bullet array, it moves them and also checks whether they are onscreen via filter.
+  If they are are offscreen, then they are removed from the bullet array in an impure manner.
+  
+  The pure way would be to not mutate the array and and turning it into a state instead.  
   */
 
   function bulletMovementObservable() {
@@ -214,7 +233,7 @@ function asteroids() {
           // if offscreen, remove its canvas element
           bull.elem.remove() 
   
-          // this method of splicing and removing directly from the global array is impure as it directly mutattes the list
+          // this method of splicing and removing directly from the global array is impure as it directly mutates the list
           arrayOfBullets.splice(arrayOfBullets.indexOf(bull), 1) // if offscreen, remove bullet from array so we don't move it anymore
         })
     })
@@ -238,6 +257,7 @@ function asteroids() {
 
     // if it has colliided, then move the ship to the middle of the screen again and update lives
     if (lineOfDistance <= radiiSum) {
+      // this is an impure method as it simply sets the attribute of the ship itself
       g.attr("transform", `translate(300 300) rotate(300)`) // manually move ship to middle of screen again
       
       // decrement lives is impure, as it directly changes the lives variable. This can be changed to a more
@@ -261,7 +281,10 @@ function asteroids() {
   /* 
   LOGIC FOR MOVING THE ASTEROIDS RANDOMLY
   Note that this method of moving asteroids randomly by setting their attributes is impure. 
-  This mutates the attributes itself and causes a side effect. 
+  This mutates the attributes itself and causes a side effect. For this reason, it has been placed
+  inside a subscribe to limit side effects.
+
+  Note: impurities have been limited to the subscribe
   */
 
   function asteroidMovementObservable() {
@@ -310,13 +333,13 @@ function asteroids() {
 
 
   /*
-    LOGIC FOR ASTEROID RESPAWNING AFTER BOMB
-    This relies on the main game observable to constantly check whether the asteroid array is empty.
-    When the asteroid array is empty, a bomb has been used and asteroids need to respawn. 
-    This is done by setting intervals withiin the observable (stopped by another interval) and creating
-    asteroiids (using SVG elements), which are then pushed into the asteroid array.
+  LOGIC FOR ASTEROID RESPAWNING AFTER BOMB
+  This relies on the main game observable to constantly check whether the asteroid array is empty.
+  When the asteroid array is empty, a bomb has been used and asteroids need to respawn. 
+  This is done by setting intervals withiin the observable (stopped by another interval) and creating
+  asteroiids (using SVG elements), which are then pushed into the asteroid array.
 
-      Note: impurities have been limited to the subscribe
+  Note: impurities have been limited to the subscribe
   */
 
   function asteroidRespawnObservable() {
@@ -355,8 +378,12 @@ This splits the asteroids into 2. It checks a splitCounter, which is the attribu
 If splitCounter is not 0, then it can still split, otherwise, it should just be destroyed.
 */
   function splitAsteroid(asteroid: Elem, asteroidX: number, asteroidY: number, asteroidRadius: number, asteroidSplitCounter: number) {
-
+    
     // if split counter not equal to 0, then split it into 2 asteroids (with an offset for x and y coordinates)
+    // This code is impure as we are setting the attributes and mutating the code. 
+    // Furthermore, it is also not the most functional way as it has an if statement. 
+    // If this were functional, we would ideally save the asteroid that collided, and filter for the split
+    // counter to know whether to destroy it or split it. 
     if (asteroid.attr("splitCounter") != 0) {
       let asteroidChildrenOffset = 20,
           asteroidNewRadius      = 10,
@@ -399,7 +426,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
        http                                                               :   //reactivex.io/documentation/operators/scan.html?source=post_page-----859eb2c4508b----------------------
 
   Everytime the player manages to shoot an asteroid, their score increases by 1. Rather than simply decrement the global variable,
-  I attempted to do this in a more functional manner by using scan. This was inspired by our lab in observableexamples.tx.
+  I attempted to do this in a more functional manner by using scan. This was inspired by our lab in observableexamples.ts.
   Since we cannot simply scan a number, the score has been turned into an array, which is then turned into an observable. 
   The seed is set to 0 and 1 is added each time as the new score is updated. 
   */
@@ -409,19 +436,20 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
     .map(({ bulletArray, asteroidArray, shipTransformX, shipTransformY, shipRotation}) => {
 
     // go through the asteroids and check it with each bullet 
-    // note that this is an impure way of doing this since you are essentially sharing states from 2 different arrays
-    // the pure way of doing this would be having a state for each of these arrays and appending each new asteroid 
-    // and each new bullet to the end to create a new copy
-    // there would then be an updateGameState observable that updates the game and the collisions would be everythiing
-    // that overlaps
-    asteroidArray.forEach((asteroid) => {
-      bulletArray.filter((bullet) => (
+    // Note that this is an impure way of doing this since you are essentially sharing states from 2 different arrays.
+    // The pure way of doing this would be having a state for each of these arrays and then appending each new asteroid 
+    // / new bullet to the end to create a new copy.
+    // There would then be an updateGameState observable that updates the game and the collisions would be everything
+    // that overlaps.
+    asteroidArray.forEach((asteroid) => { // go through asteroids 
+      bulletArray.filter((bullet) => ( // and then filter for bullets that collide
         checkBulletCollision(Number(asteroid.attr("cx")), Number(bullet.attr("cx")), Number(asteroid.attr("cy")), Number(bullet.attr("cy")), Number(bullet.attr("r")), Number(asteroid.attr("r")), shipTransformX, shipTransformY, shipRotation)
       ))
         .forEach((bullet) => {
 
           // remove bullets from the array and remove the canvas element
           bullet.elem.remove()
+          // this is impure as it directly mutates the global variable
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
 
           // increase score by 1 for each collision - scan is used here to attempt to do this in a more pure way rather than
@@ -461,7 +489,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   */
 
   // save the state here so we can do multiple filters for different parts of the screen
-  // this was inspired by the mousePosObsevable function that was seen in observableexamples.ts
+  // this was inspired by the mousePosObservable function that was seen in observableexamples.ts
   // in tutorial 4
 
   function shipWrappingObservable() {
@@ -480,7 +508,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
-
+      // setting the attribute here is impure
       g.attr("transform", `translate(${transformX = 10} ${transformY}) rotate(${shipRotation})`)
     })
 
@@ -491,7 +519,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
-
+          // setting the attribute here is impure
       g.attr("transform", `translate(${transformX = 600} ${transformY}) rotate(${shipRotation})`)
     })
 
@@ -502,8 +530,8 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
-
-      g.attr("transform", `translate(${transformX} ${transformY = 0}) rotate(${shipRotation})`)
+          // setting the attribute here is impure
+      g.attr("transform", `translate(${transformX} ${transformY = 10}) rotate(${shipRotation})`)
     })
 
   // if ship leaves bottom of screen
@@ -523,6 +551,9 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   /*
   LOGIC FOR ASTEROIDS WRAPPING AROUND THE SCREEN
   This ensures that when an asteroids moves off the screen, it comes back onscreen via the other side.
+
+  Here, we iterate through each asteroid in the array and check whether it is greater or equal to the size of the screen. This filter returns the elements that are true for this
+  and then set it.
   */
 
   function asteroidWrappingObservable() {
@@ -533,22 +564,26 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
       })
 
     // going out of right screen
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
+    asteroidWrappingState.forEach((asteroid) => asteroid
+      .filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
       .map((asteroid) => asteroid.attr("cx", 0))
     ).subscribe(_ => {})
 
     // // going out of top screen
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
+    asteroidWrappingState.forEach((asteroid) => asteroid
+      .filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
       .map((asteroid) => asteroid.attr("cy", 0))
     ).subscribe(() => {})
 
     // // going out of left screen
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
+    asteroidWrappingState.forEach((asteroid) => asteroid.
+      filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
       .map((asteroid) => asteroid.attr("cx", 600))
     ).subscribe(() => {})
 
     // // going out of bottom screen
-    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
+    asteroidWrappingState.forEach((asteroid) => asteroid
+      .filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
       .map((asteroid) => asteroid.attr("cy", 600))
     ).subscribe(() => {})
 
@@ -586,13 +621,13 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
     ).subscribe(_ => {})
   }
 
-
-
   /*
   LOGIC FOR REMOVING CIRCLE CANVAS ELEMENTS (ASTEROIDS)
   When the bomb clears the asteroid array, the asteroid's canvas elements are removed using the following
   function. It uses getElementsByTagName to grab the circle element, return a NodeList that is then converted
   into an array. This is then removed from the HTML.
+
+  This function is impure as it removes canvas elements.
 
   Code inspired by: 
        https      :   //stackoverflow.com/questions/20044252/remove-all-the-dom-elements-with-a-specific-tag-name-in-javascript
@@ -651,7 +686,7 @@ function bombPowerupObservable() {
       }).subscribe(_ => {})
     }).subscribe(_ => {
       
-      //update bomb since it has been used
+      //update bomb since it has been used - this is impure
       bomb--
       updateHTMLElements(myScore, lives, bomb)
     })
@@ -667,7 +702,7 @@ function bombPowerupObservable() {
   }
 
    /* 
-  Impure function that is used to show the game over text elemment
+  Impure function that is used to show the game over text element
   */
   function showGameOver() {
     // game is now complete
@@ -696,7 +731,8 @@ function bombPowerupObservable() {
     document.getElementById("showScore")!.innerHTML = "YOUR SCORE: " + myScore[0]
   }
 
-  // the observables made have been placed into functions as seen from our tutorial's observableexamples.ts
+  // All observables made have been placed into functions as seen from our tutorial's observableexamples.ts
+  // This makes the code more reusable and allows it to be easier to be debugged. 
   shipPosObservable(); // moves the ship
   bulletMovementObservable(); // shoots bullets
   asteroidMovementObservable(); // moves asteroids

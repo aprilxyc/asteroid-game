@@ -401,7 +401,13 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   function asteroidBulletCollisionObservable() {
     mainAsteroidsObservable
     .map(({ bulletArray, asteroidArray, shipTransformX, shipTransformY, shipRotation}) => {
+
     // go through the asteroids and check it with each bullet 
+    // note that this is an impure way of doing this since you are essentially sharing states from 2 different arrays
+    // the pure way of doing this would be having a state for each of these arrays and appending each new asteroid 
+    // and each new bullet to the end to create a new copy
+    // there would then be an updateGameState observable that updates the game and the collisions would be everythiing
+    // that overlaps
     asteroidArray.forEach((asteroid) => {
       bulletArray.filter((bullet) => (
         checkBulletCollision(Number(asteroid.attr("cx")), Number(bullet.attr("cx")), Number(asteroid.attr("cy")), Number(bullet.attr("cy")), Number(bullet.attr("r")), Number(asteroid.attr("r")), shipTransformX, shipTransformY, shipRotation)

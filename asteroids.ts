@@ -21,6 +21,8 @@ function asteroids() {
         https                                                                                            :   //github.com/harsilspatel/pong-breakout/blob/master/src/pong.ts
         https                                                                                            :   //github.com/harsilspatel/pong-breakout/blob/master/src/breakout.ts
         The concept of a main game observable that handles everything was inspired from here along with the access of objects.
+  The full game has been implemented including the presence fo random asteroids, bullet and asteroid collision detection,
+  ship and asteroid collision detection (player loses liife when this happens) and screen wrapping. 
 
   EXTRA FEATURES ADDED: 
   - Score that increments when you shoot asteroids - each asteroid is worth 1 point.

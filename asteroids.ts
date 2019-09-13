@@ -423,6 +423,7 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   */
 
   // save the state here so we can do multiple filters for different parts of the screen
+  // this was inspired by the mousePosObsevable function that was seen in basicexamples.ts
   const shipWrappingState = mainAsteroidsObservable
     .map(({ ship, shipTransformX, shipTransformY, shipRotation }) => // use this to access ship x, y and rotation
       ({

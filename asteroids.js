@@ -1,6 +1,6 @@
 "use strict";
 function asteroids() {
-    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = 0, lives = 3, bomb = 3, gameComplete = false;
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = [1, 1], lives = [1, 1, 1], newLives = [], bomb = 3, gameComplete = false;
     const mainTimer = Observable.interval(5), asteroidObservable = Observable.interval(1), mainAsteroidsObservable = mainTimer
         .takeUntil(mainTimer.filter(_ => gameComplete == true)).map(_ => ({
         bulletArray: arrayOfBullets,
@@ -31,7 +31,7 @@ function asteroids() {
     }).filter(({ key, keyCode }) => (key == "ArrowRight" || keyCode == 68))
         .flatMap((key) => (Observable.interval(15)
         .takeUntil(keyup$)))
-        .subscribe(({}) => {
+        .subscribe(_ => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation + 10})`);
     });
@@ -43,7 +43,7 @@ function asteroids() {
     }).filter(({ key, keyCode }) => (key == "ArrowLeft" || keyCode == 65))
         .flatMap((key) => (Observable.interval(15)
         .takeUntil(keyup$)))
-        .subscribe(({}) => {
+        .subscribe(_ => {
         let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
         g.attr("transform", `translate(${transformX} ${transformY}) rotate(${shipRotation = shipRotation - 10})`);
     });
@@ -98,7 +98,7 @@ function asteroids() {
         let lineOfDistance = Math.sqrt((Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2))), radiiSum = radius1 + radius2;
         if (lineOfDistance <= radiiSum) {
             g.attr("transform", `translate(300 300) rotate(300)`);
-            --lives;
+            lives--;
             updateHTMLElements(myScore, lives, bomb);
             return true;
         }
@@ -176,7 +176,11 @@ function asteroids() {
                 .forEach((bullet) => {
                 bullet.elem.remove();
                 arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
-                myScore += scoreIncrease;
+                let source = Observable.fromArray(myScore)
+                    .scan(0, function (acc, x) {
+                    return acc + x;
+                });
+                let subscription = source.subscribe(function (x) { myScore = [x, 1]; });
                 updateHTMLElements(myScore, lives, bomb);
                 splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")));
                 asteroid.elem.remove();
@@ -269,14 +273,14 @@ function asteroids() {
                 .takeUntil(Observable.interval(150))
                 .map(() => {
                 explosion.elem.remove();
-            }).subscribe(_ => console.log);
-        }).subscribe(_ => console.log);
+            }).subscribe(_ => { });
+        }).subscribe(_ => { });
     }).subscribe((arrayOfAsteroids) => {
         bomb--;
         updateHTMLElements(myScore, lives, bomb);
     });
     function updateHTMLElements(score, lives, bomb) {
-        document.getElementById("score").innerHTML = "Score: " + score;
+        document.getElementById("score").innerHTML = "Score: " + score[0];
         document.getElementById("lives").innerHTML = "Lives: " + lives;
         document.getElementById("bomb").innerHTML = "Bomb: " + bomb;
     }

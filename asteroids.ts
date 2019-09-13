@@ -15,16 +15,23 @@ function asteroids() {
 
   // make levels and if you get to certain amount of points, the background will change
   // you win when you hit a certain amount of points
-
-  // have a random booster that that shows up every 10 seconds -> gives you more points
+  // TODO: add information about why I did it this way and inspirattion from the tutorials
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
-  let            arrayOfAsteroids: Elem[] = [],    // array of bullets
-  arrayOfBullets: Elem[]                  = [],
-  myScore        :number                  = 0,
-  lives          :number                  = 3,
+  let            arrayOfAsteroids: Elem[] = [],          // array of bullets
+  arrayOfBullets : Elem[]                 = [],
+                 myScore                  = [1,1],
+                 lives                    = [1, 1, 1],
+                 newLives                 = [],
   bomb           : number                 = 3,
   gameComplete   : boolean                = false
+          
+
+  // Observable.fromArray(myScore).scan((acc, curr) => acc + 10, 0)
+  // .subscribe((e) => console.log(e))
+  
+  // .scan((acc, curr) => acc + 10, 0)
+  // .subscribe(value => console.log(value))
 
   const mainTimer               = Observable.interval(5),
         asteroidObservable      = Observable.interval(1),
@@ -78,7 +85,7 @@ function asteroids() {
       Observable.interval(15)
         .takeUntil(keyup$)
     ))
-    .subscribe(({ }) => {
+    .subscribe(_ => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
@@ -96,7 +103,7 @@ function asteroids() {
       Observable.interval(15)
         .takeUntil(keyup$)
     ))
-    .subscribe(({ }) => {
+    .subscribe(_ => {
       let transformX   = Number(g.elem.transform.baseVal.getItem(0).matrix.e),
           transformY   = Number(g.elem.transform.baseVal.getItem(0).matrix.f),
           shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle)
@@ -185,7 +192,14 @@ function asteroids() {
     // if it has colliided, then move the ship to the middle of the screen againi and update lives
     if (lineOfDistance <= radiiSum) {
       g.attr("transform", `translate(300 300) rotate(300)`)
-      --lives
+
+      // Observable.fromArray(lives) // reducing score using scan
+      // .scan(3, function(acc, value) {
+      //   return acc - 1;
+      // })
+      // .subscribe(value => console.log(value));
+    // console.log(lives)
+      lives--
       updateHTMLElements(myScore, lives, bomb)
       return true
     }
@@ -317,6 +331,8 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   /* 
   LOGIC FOR BULLET AND ASTEROID COLLISIONS 
   This removes bullets and asteroids when bullets collide with asteroids.
+  Note that the use of scan was inspired by the sample code from ReactiveX: 
+       http                                                               :   //reactivex.io/documentation/operators/scan.html?source=post_page-----859eb2c4508b----------------------
   */
   mainAsteroidsObservable.map(({ bulletArray, asteroidArray, shipTransformX, shipTransformY, shipRotation}) => {
     
@@ -331,8 +347,20 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
           bullet.elem.remove()
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
 
-          // increase score by 10 for each collision
-          myScore += scoreIncrease
+          // increase score by 1 for each collision
+          let source = Observable.fromArray(myScore)
+          .scan(0, function (acc, x) {
+            return acc + x;
+          });
+
+          let subscription = source.subscribe(
+              function (x) { myScore = [x, 1]} // store the new value into first part of array and keep accumulating 1
+          )
+
+
+
+
+          // myScore += scoreIncrease
           updateHTMLElements(myScore, lives, bomb)
 
           // split asteroids into new asteroids here
@@ -508,8 +536,8 @@ LOGIC FOR USING BOMB POWERUP
         .takeUntil(Observable.interval(150))
         .map(() => {
           explosion.elem.remove()
-        }).subscribe(_ => console.log)
-      }).subscribe(_ => console.log)
+        }).subscribe(_ => {})
+      }).subscribe(_ => {})
     }).subscribe((arrayOfAsteroids) => {
       //update bomb since it has been used
       bomb--
@@ -520,7 +548,7 @@ LOGIC FOR USING BOMB POWERUP
   Impure function that is used to update the score, lives and bomb onto the screen
   */
   function updateHTMLElements(score: number, lives: number, bomb: number) {
-    document.getElementById("score")!.innerHTML = "Score: " + score
+    document.getElementById("score")!.innerHTML = "Score: " + score[0]
     document.getElementById("lives")!.innerHTML = "Lives: " + lives
     document.getElementById("bomb")!.innerHTML  = "Bomb: " + bomb
   }

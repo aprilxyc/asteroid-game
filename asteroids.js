@@ -59,14 +59,17 @@ function asteroids() {
             });
         }).filter(({ key, transformX, transformY, shipRotation, keyCode }) => (key == "ArrowUp" || keyCode == 87))
             .map(({ key, transformX, transformY, shipRotation }) => ({
-            vx: Math.cos(Math.PI * (shipRotation - 90) / 180),
-            vy: Math.sin(Math.PI * (shipRotation - 90) / 180)
+            directionX: Math.cos(Math.PI * (shipRotation - 90) / 180),
+            directionY: Math.sin(Math.PI * (shipRotation - 90) / 180)
         }))
-            .flatMap(({ vx, vy }) => Observable.interval(50)
-            .map(t => ({ x: 300 * vx / t, y: 300 * vy / t })))
-            .subscribe(({ x, y }) => {
+            .flatMap(({ directionX, directionY }) => Observable.interval(30)
+            .map(thrust => ({
+            newX: 300 * directionX / thrust,
+            newY: 300 * directionY / thrust
+        })))
+            .subscribe(({ newX, newY }) => {
             let transformX = Number(g.elem.transform.baseVal.getItem(0).matrix.e), transformY = Number(g.elem.transform.baseVal.getItem(0).matrix.f), shipRotation = Number(g.elem.transform.baseVal.getItem(1).angle);
-            g.attr("transform", `translate(${transformX = transformX + x} ${transformY = transformY + y}) rotate(${shipRotation})`);
+            g.attr("transform", `translate(${transformX = transformX + newX} ${transformY = transformY + newY}) rotate(${shipRotation})`);
         });
         keydown$
             .map(({ key, keyCode }) => ({

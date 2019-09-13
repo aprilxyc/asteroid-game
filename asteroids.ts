@@ -27,6 +27,7 @@ function asteroids() {
   - Lives that decrement when your ship hits an asteroid - you have 3 lives.
   - bomb feature that clears your screen for a moment and replaces asteroids with smaller asteroids (used when you are overwhelmed by asteroids).
     This bomb feature can be used 3 times.
+    - Thrust when ship moves forward
   */
 
 
@@ -67,26 +68,30 @@ function asteroids() {
   let polygonTag  = document.querySelector("polygon"),
       polygonBBox = polygonTag!.getBBox()
 
+      const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode, key, repeat}) => ({
+        asteroidArray: arrayOfAsteroids,
+        keyCode,
+        key,
+        repeat
+      })),
+      keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
+
   // creates new observable that emits an event object everytime a keydown is fired
   // we define the objects in this observable that we need so we can access them below when we start
   // defining ship movements based on keys and keycodes
   // this method is more pure than simply grabbing global variables from outside the scope
-  const keydown$ = Observable.fromEvent<KeyboardEvent>(document, 'keydown').map(({keyCode, key, repeat}) => ({
-    asteroidArray: arrayOfAsteroids,
-    keyCode,
-    key,
-    repeat
-  })),
-  keyup$ = Observable.fromEvent<KeyboardEvent>(document, 'keyup');
+
 
   /* 
-  LOGIC FOR KEY MOVEMENT 
+  LOGIC FOR SHIP MOVEMENT (ROTATING AND MOVING FORWARD)
   Note: setting the attributes is an impure way of doing things as it causes side effects.
   Attributes are set for moving the ship's coordinates. Due to their impure nature, they have been limited
   to inside the subscribes.
   */
 
-  // moving ship to the right
+  function shipPosObservable () {
+
+    // moving ship to the right
   keydown$
   .map(({ key }) => {
     return ({
@@ -182,24 +187,30 @@ function asteroids() {
 
     })
 
+  }
+  
+
   /*
   LOGIC FOR MOVING BULLETS AND REMOVING BULLETS THAT ARE OFFSCREEN FROM ARRAY
   */
-  mainAsteroidsObservable.subscribe(({ bulletArray }) => {
-    bulletArray
-      .map((bullet) =>
-      bullet
-      .attr("cx", Number(bullet.attr("cx")) + Number(bullet.attr("bulletDistanceX"))) // go through each bullet and add an X distance to move it
-      .attr("cy", Number(bullet.attr("cy")) + Number(bullet.attr("bulletDistanceY")))) // go through each bullet and add a Y distance to move it
-      .filter((bull) => (Number(bull.attr("cx")) >= 600) || Number(bull.attr("cy")) >= 600 || Number(bull.attr("cy")) <= 0 || Number(bull.attr("cx")) <= 0) // remove the bullets if offscreen by filtering
-      .forEach((bull) => {
-        // if offscreen, remove its canvas element
-        bull.elem.remove() 
 
-        // this method of splicing and removing directly from the global array is impure as it directly mutattes the list
-        arrayOfBullets.splice(arrayOfBullets.indexOf(bull), 1) // if offscreen, remove bullet from array so we don't move it anymore
-      })
-  })
+  function bulletMovementObservable() {
+    mainAsteroidsObservable.subscribe(({ bulletArray }) => {
+      bulletArray
+        .map((bullet) =>
+        bullet
+        .attr("cx", Number(bullet.attr("cx")) + Number(bullet.attr("bulletDistanceX"))) // go through each bullet and add an X distance to move it
+        .attr("cy", Number(bullet.attr("cy")) + Number(bullet.attr("bulletDistanceY")))) // go through each bullet and add a Y distance to move it
+        .filter((bull) => (Number(bull.attr("cx")) >= 600) || Number(bull.attr("cy")) >= 600 || Number(bull.attr("cy")) <= 0 || Number(bull.attr("cx")) <= 0) // remove the bullets if offscreen by filtering
+        .forEach((bull) => {
+          // if offscreen, remove its canvas element
+          bull.elem.remove() 
+  
+          // this method of splicing and removing directly from the global array is impure as it directly mutattes the list
+          arrayOfBullets.splice(arrayOfBullets.indexOf(bull), 1) // if offscreen, remove bullet from array so we don't move it anymore
+        })
+    })
+  }
 
   /* 
   Checks for collisions between the bullet and the asteroid by checking whether the line distance is less
@@ -244,13 +255,16 @@ function asteroids() {
   Note that this method of moving asteroids randomly by setting their attributes is impure. 
   This mutates the attributes itself and causes a side effect. 
   */
-  mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
-    asteroidArray.forEach((asteroid) => { // go through every asteroid in the asteroid array and set its movement
-      asteroid
-        .attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx"))) // set x to random direction + current x coordinate to get it moving randomly
-        .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy"))) // set y to random direction + current y coordinate to get it moving randomly
+
+  function asteroidMovementObservable() {
+    mainAsteroidsObservable.subscribe(({ asteroidArray }) => {
+      asteroidArray.forEach((asteroid) => { // go through every asteroid in the asteroid array and set its movement
+        asteroid
+          .attr("cx", Number(asteroid.attr("directionX")) + Number(asteroid.attr("cx"))) // set x to random direction + current x coordinate to get it moving randomly
+          .attr("cy", Number(asteroid.attr("directionY")) + Number(asteroid.attr("cy"))) // set y to random direction + current y coordinate to get it moving randomly
+      })
     })
-  })
+  }
 
   /*
   LOGIC TO CREATE THE ASTEROIDS AND PUT IT INTO AN ARRAY
@@ -261,7 +275,9 @@ function asteroids() {
 
   Note: impurities have been limited to the subscribe
   */
- mainAsteroidsObservable
+
+  function asteroidCreationObservable() {
+    mainAsteroidsObservable
     .takeUntil(asteroidObservable.filter(timer => timer == 8)) // stop making asteroids after 8 milliseconds, inspired by Harsil's game example that Tim Dwyer posted
     .subscribe(_ => {
       // create random starting points
@@ -282,6 +298,8 @@ function asteroids() {
       // push asteroid into array - this is impure as it causes a side effect by mutating the array directly
       arrayOfAsteroids.push(asteroid)
     })
+  }
+
 
   /*
     LOGIC FOR ASTEROID RESPAWNING AFTER BOMB
@@ -292,6 +310,8 @@ function asteroids() {
 
       Note: impurities have been limited to the subscribe
   */
+
+  function asteroidRespawnObservable() {
     mainAsteroidsObservable
     .filter(({asteroidArray}) => asteroidArray.length == 0) // only runs when asteroid array is empty
     .subscribe(({}) => {
@@ -319,6 +339,7 @@ function asteroids() {
         arrayOfAsteroids.push(asteroid)
 
       }).subscribe(_ => {})})
+  }
 
 /* 
 LOGIC TO SPLIT THE ASTEROIDS
@@ -374,8 +395,10 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   Since we cannot simply scan a number, the score has been turned into an array, which is then turned into an observable. 
   The seed is set to 0 and 1 is added each time as the new score is updated. 
   */
-  mainAsteroidsObservable
-  .map(({ bulletArray, asteroidArray, shipTransformX, shipTransformY, shipRotation}) => {
+
+  function asteroidBulletCollisionObservable() {
+    mainAsteroidsObservable
+    .map(({ bulletArray, asteroidArray, shipTransformX, shipTransformY, shipRotation}) => {
     // go through the asteroids and check it with each bullet 
     asteroidArray.forEach((asteroid) => {
       bulletArray.filter((bullet) => (
@@ -412,7 +435,8 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
         })
     })
   }).subscribe(_ => {})
-
+  }
+  
   /*
   LOGIC THAT WRAPS THE SHIP
   This ensures that if the ship goes offscreen, then it wraps to the other side of the screen. 
@@ -424,7 +448,9 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
 
   // save the state here so we can do multiple filters for different parts of the screen
   // this was inspired by the mousePosObsevable function that was seen in basicexamples.ts
-  const shipWrappingState = mainAsteroidsObservable
+
+  function shipWrappingObservable() {
+    const shipWrappingState = mainAsteroidsObservable
     .map(({ ship, shipTransformX, shipTransformY, shipRotation }) => // use this to access ship x, y and rotation
       ({
         shipTransformX,
@@ -476,38 +502,43 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
       g.attr("transform", `translate(${transformX} ${transformY = 600}) rotate(${shipRotation})`)
     })
 
+  }
+  
 
   /*
   LOGIC FOR ASTEROIDS WRAPPING AROUND THE SCREEN
   This ensures that when an asteroids moves off the screen, it comes back onscreen via the other side.
   */
 
-  // save the asteroid wrapping as a state
-  let asteroidWrappingState = 
-    mainAsteroidsObservable.map(({ asteroidArray }) => {
-      return asteroidArray // get the array itself
-    })
+  function asteroidWrappingObservable() {
+        // save the asteroid wrapping as a state
+      let asteroidWrappingState = 
+      mainAsteroidsObservable.map(({ asteroidArray }) => {
+        return asteroidArray // get the array itself
+      })
 
-  // going out of right screen
-  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
-    .map((asteroid) => asteroid.attr("cx", 0))
-  ).subscribe(_ => {})
+    // going out of right screen
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) >= 650)
+      .map((asteroid) => asteroid.attr("cx", 0))
+    ).subscribe(_ => {})
 
-  // // going out of top screen
-  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
-    .map((asteroid) => asteroid.attr("cy", 0))
-  ).subscribe(() => {})
+    // // going out of top screen
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cy")) >= 650)
+      .map((asteroid) => asteroid.attr("cy", 0))
+    ).subscribe(() => {})
 
-  // // going out of left screen
-  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
-    .map((asteroid) => asteroid.attr("cx", 600))
-  ).subscribe(() => {})
+    // // going out of left screen
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => Number(asteroid.attr("cx")) <= -50)
+      .map((asteroid) => asteroid.attr("cx", 600))
+    ).subscribe(() => {})
 
-  // // going out of bottom screen
-  asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
-    .map((asteroid) => asteroid.attr("cy", 600))
-  ).subscribe(() => {})
+    // // going out of bottom screen
+    asteroidWrappingState.forEach((asteroid) => asteroid.filter((asteroid) => parseFloat(asteroid.attr("cy")) <= -50)
+      .map((asteroid) => asteroid.attr("cy", 600))
+    ).subscribe(() => {})
 
+  }
+  
   /*
   LOGIC FOR SPACESHIP COLLIDING WITH ASTEROID
   This checks whether the ship has collided with the asteroid by iterating through the asteroid array and checking
@@ -518,24 +549,28 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
   to the middle, hence the collision will continue. This can be countered by setting an observable to make them invincible at the
   beginning of each reset or game. 
   */
-  mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
-    return ({
-      asteroidArray : asteroidArray,
-      shipTransformX: shipTransformX,
-      shipTransformY: shipTransformY
+
+  function shipCollidingAsteroidObservable() {
+    mainAsteroidsObservable.map(({ asteroidArray, shipTransformX, shipTransformY }) => {
+      return ({
+        asteroidArray : asteroidArray,
+        shipTransformX: shipTransformX,
+        shipTransformY: shipTransformY
+      })
+    }).forEach(({ asteroidArray, shipTransformX, shipTransformY, shipRotation }) => // going through asteroid array
+      asteroidArray
+        .filter((asteroid) => // if asteroid has collided with ship, then call functon to split or destroy asteroid
+          checkShipCollision(Number(shipTransformX), Number(asteroid.attr("cx")), Number(shipTransformY), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(polygonBBox.width - 15), shipTransformX, shipTransformY, shipRotation))
+      .map(() => {
+        return lives // retturn lives so we can check it
+    }).filter((lives) => (lives == 0)) // if lives is 0, then show game over
+      .map(() => {
+        // game is over, show game over HTMl element
+        showGameOver()
     })
-  }).forEach(({ asteroidArray, shipTransformX, shipTransformY, shipRotation }) => // going through asteroid array
-    asteroidArray
-      .filter((asteroid) => // if asteroid has collided with ship, then call functon to split or destroy asteroid
-        checkShipCollision(Number(shipTransformX), Number(asteroid.attr("cx")), Number(shipTransformY), Number(asteroid.attr("cy")), Number(asteroid.attr("r")), Number(polygonBBox.width - 15), shipTransformX, shipTransformY, shipRotation))
-    .map(() => {
-      return lives // retturn lives so we can check it
-  }).filter((lives) => (lives == 0)) // if lives is 0, then show game over
-    .map(() => {
-      // game is over, show game over HTMl element
-      showGameOver()
-  })
-  ).subscribe(_ => {})
+    ).subscribe(_ => {})
+  }
+
 
 
   /*
@@ -558,6 +593,9 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
 /* 
 LOGIC FOR USING BOMB POWERUP
 */
+
+function bombPowerupObservable() {
+
   keydown$.map(({ keyCode, repeat }) => {
     return ({
       keyCode,
@@ -601,7 +639,8 @@ LOGIC FOR USING BOMB POWERUP
       bomb--
       updateHTMLElements(myScore, lives, bomb)
     })
-
+}
+  
   /* 
   Impure function that is used to update the score, lives and bomb onto the screen
   */
@@ -631,6 +670,18 @@ LOGIC FOR USING BOMB POWERUP
 
     document.getElementById("gameOver")!.innerHTML = "GAME OVER"
   }
+
+  shipPosObservable(); // moves the ship
+  bulletMovementObservable(); // shoots bullets
+  asteroidMovementObservable(); // moves asteroids
+  asteroidCreationObservable(); // creates asteroids
+  asteroidRespawnObservable(); // respawns asteroids after bomb
+  asteroidBulletCollisionObservable(); // bullet shooting asteroid collisions -> breaks asteroids apart or destroys them
+  shipWrappingObservable(); // wraps the ship across screen
+  asteroidWrappingObservable(); // wraps asteroids across the screen
+  shipCollidingAsteroidObservable(); // handles ship colliding with asteroid
+  bombPowerupObservable(); // handles bomb powerup
+
 }
 
 // the following simply runs your asteroids function on window load.  Make sure to leave it in place.

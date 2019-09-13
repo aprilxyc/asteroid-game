@@ -681,7 +681,16 @@ function bombPowerupObservable() {
       .attr('font-size', 50)
       .attr("id", "gameOver")
 
-    document.getElementById("gameOver")!.innerHTML = "GAME OVER"
+      const scoreText = new Elem(svg, 'text')
+      .attr('x', 220)
+      .attr('y', 360)
+      .attr('fill', '#ffffff')
+      .attr('font-family', "monospace")
+      .attr('font-size', 20)
+      .attr("id", "showScore")
+
+    document.getElementById("gameOver")!.innerHTML  = "GAME OVER"
+    document.getElementById("showScore")!.innerHTML = "YOUR SCORE: " + myScore[0]
   }
 
   shipPosObservable(); // moves the ship

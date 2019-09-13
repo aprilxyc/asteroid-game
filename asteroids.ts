@@ -13,40 +13,29 @@ function asteroids() {
   // Explain which ideas you have used ideas from the lectures to 
   // create reusable, generic functions.
 
-  // make levels and if you get to certain amount of points, the background will change
-  // you win when you hit a certain amount of points
   // TODO: add information about why I did it this way and inspirattion from the tutorials
 
   // save global variables so you can make objects reference them later - taken from Harsil's code
-  let            arrayOfAsteroids: Elem[] = [],          // array of bullets
-  arrayOfBullets : Elem[]                 = [],
-                 myScore                  = [1,1],
-                 lives                    = [1, 1, 1],
-                 newLives                 = [],
+  let            arrayOfAsteroids: Elem[] = [],      // array of asteroids
+  arrayOfBullets : Elem[]                 = [],      // array of bulletts
+  myScore        : number[]               = [1,1],   // done using scan
+  lives          : number                 = 3,
   bomb           : number                 = 3,
   gameComplete   : boolean                = false
-          
 
-  // Observable.fromArray(myScore).scan((acc, curr) => acc + 10, 0)
-  // .subscribe((e) => console.log(e))
-  
-  // .scan((acc, curr) => acc + 10, 0)
-  // .subscribe(value => console.log(value))
-
-  const mainTimer               = Observable.interval(5),
-        asteroidObservable      = Observable.interval(1),
-        mainAsteroidsObservable = mainTimer
+  const mainTimer               = Observable.interval(5),   // main timer that emits observable to stop main game when game is complette
+        asteroidObservable      = Observable.interval(1),   // this is used to set when to stop the spawning of the asteroids at the beginning of the game 
+        mainAsteroidsObservable = mainTimer                 // this is the main game that consatntly checks throughout the game for changes - this ensures everything in the game is on the same timeline
     .takeUntil(
       mainTimer.filter(_ => gameComplete == true)
     ).map(_ => ({
       bulletArray   : arrayOfBullets,
       asteroidArray : arrayOfAsteroids,
       ship          : g,
-      shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
+      shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),   // save information here as objects so we can access them
       shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
       shipRotation  : Number(g.elem.transform.baseVal.getItem(1).angle)
     })),
-    scoreIncrease = 10
 
   const svg = document.getElementById("canvas")!,
   
@@ -57,7 +46,7 @@ function asteroids() {
     .attr("points", "-15,20 0,15 15,20 0, -20")
     .attr("style", "fill:#171846;stroke:#ffffff ;stroke-width:2")
 
-  // get the width / height of the polygon element g
+  // get the width / height of the polygon element g - this is used to get the exact width of the ship SVG for collision checking
   let polygonTag  = document.querySelector("polygon"),
       polygonBBox = polygonTag!.getBBox()
 
@@ -192,13 +181,8 @@ function asteroids() {
     // if it has colliided, then move the ship to the middle of the screen againi and update lives
     if (lineOfDistance <= radiiSum) {
       g.attr("transform", `translate(300 300) rotate(300)`)
-
-      // Observable.fromArray(lives) // reducing score using scan
-      // .scan(3, function(acc, value) {
-      //   return acc - 1;
-      // })
-      // .subscribe(value => console.log(value));
-    // console.log(lives)
+      
+      // decrement lives
       lives--
       updateHTMLElements(myScore, lives, bomb)
       return true
@@ -348,19 +332,14 @@ If splitCounter is not 0, then it can still split, otherwise, it should just be 
           arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1)
 
           // increase score by 1 for each collision
-          let source = Observable.fromArray(myScore)
+          let scoreAccumulator = Observable.fromArray(myScore)
           .scan(0, function (acc, x) {
             return acc + x;
-          });
-
-          let subscription = source.subscribe(
-              function (x) { myScore = [x, 1]} // store the new value into first part of array and keep accumulating 1
+          }).subscribe(
+            function (x) { myScore = [x, 1]} // store the new value into first part of array and keep accumulating 1
           )
-
-
-
-
-          // myScore += scoreIncrease
+          
+          // update score html
           updateHTMLElements(myScore, lives, bomb)
 
           // split asteroids into new asteroids here

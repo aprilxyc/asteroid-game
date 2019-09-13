@@ -1,6 +1,6 @@
 "use strict";
 function asteroids() {
-    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = [1, 1], lives = [1, 1, 1], newLives = [], bomb = 3, gameComplete = false;
+    let arrayOfAsteroids = [], arrayOfBullets = [], myScore = [1, 1], lives = 3, bomb = 3, gameComplete = false;
     const mainTimer = Observable.interval(5), asteroidObservable = Observable.interval(1), mainAsteroidsObservable = mainTimer
         .takeUntil(mainTimer.filter(_ => gameComplete == true)).map(_ => ({
         bulletArray: arrayOfBullets,
@@ -9,7 +9,7 @@ function asteroids() {
         shipTransformX: Number(g.elem.transform.baseVal.getItem(0).matrix.e),
         shipTransformY: Number(g.elem.transform.baseVal.getItem(0).matrix.f),
         shipRotation: Number(g.elem.transform.baseVal.getItem(1).angle)
-    })), scoreIncrease = 10;
+    }));
     const svg = document.getElementById("canvas");
     const g = new Elem(svg, 'g')
         .attr("transform", "translate(300 300) rotate(170)");
@@ -176,11 +176,10 @@ function asteroids() {
                 .forEach((bullet) => {
                 bullet.elem.remove();
                 arrayOfBullets.splice(arrayOfBullets.indexOf(bullet), 1);
-                let source = Observable.fromArray(myScore)
+                let scoreAccumulator = Observable.fromArray(myScore)
                     .scan(0, function (acc, x) {
                     return acc + x;
-                });
-                let subscription = source.subscribe(function (x) { myScore = [x, 1]; });
+                }).subscribe(function (x) { myScore = [x, 1]; });
                 updateHTMLElements(myScore, lives, bomb);
                 splitAsteroid(asteroid, parseFloat(asteroid.attr("cx")), parseFloat(asteroid.attr("cy")), parseFloat(asteroid.attr("r")), parseFloat(asteroid.attr("splitCounter")));
                 asteroid.elem.remove();

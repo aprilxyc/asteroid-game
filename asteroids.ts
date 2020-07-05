@@ -8,7 +8,7 @@
 function asteroids() {
   // Inside this function you will use the classes and functions 
   // defined in svgelement.ts and observable.ts
-  // to add visuals to the svg element in asteroids.html, animate them, and make them interactive.
+  // to add visuals to the svg element in index.html, animate them, and make them interactive.
   // Study and complete the Observable tasks in the week 4 tutorial worksheet first to get ideas.
 
   // You will be marked on your functional programming style

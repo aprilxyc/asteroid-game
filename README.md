@@ -1,3 +1,5 @@
-# Asteroid Game 🚀
+# Asteroids 🚀
 
-Classic Asteroid Game I made for a FIT2102 Assignment that demonstrates functional programming.
+Asteroids Game made for a FIT2102 Assignment 1. This demonstrates functional programming by using observables.
+
+Play the game here: https://aprilxyc.github.io/asteroid-game/
